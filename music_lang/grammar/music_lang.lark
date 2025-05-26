@@ -1,0 +1,73 @@
+// music_lang.lark - 音樂程式語言語法定義
+
+?start: statement*
+
+?statement: note_stmt
+          | chord_stmt  
+          | tempo_stmt
+          | loop_stmt
+          | fn_stmt
+          | assignment
+          | expression ";"
+
+// 音符語句
+note_stmt: "note" note_literal ("," duration)?
+
+// 和弦語句  
+chord_stmt: "chord" chord_literal ("," duration)?
+
+// 速度設定
+tempo_stmt: "tempo" number
+
+// 迴圈語句
+loop_stmt: "loop" number "{" statement* "}"
+
+// 函數定義
+fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
+
+// 參數列表
+parameter_list: identifier ("," identifier)*
+
+// 賦值語句
+assignment: identifier "=" expression
+
+// 表達式
+?expression: arithmetic_expr
+           | note_literal
+           | chord_literal
+
+// 算術表達式
+?arithmetic_expr: arithmetic_expr "+" term   -> add
+                | arithmetic_expr "-" term   -> sub
+                | term
+
+?term: term "*" factor -> mul
+     | term "/" factor -> div
+     | factor
+
+?factor: "(" arithmetic_expr ")"
+       | atom
+
+?atom: number
+     | identifier
+
+// 基本類型
+note_literal: NOTE_STRING
+chord_literal: "[" note_list "]"
+note_list: note_literal ("," note_literal)*
+duration: number
+identifier: IDENTIFIER
+
+// Token 定義
+NOTE_STRING: "\"" NOTE_PATTERN "\""
+NOTE_PATTERN: /[A-Ga-g]#?[0-9]/
+
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+
+number: NUMBER
+NUMBER: /\d+(\.\d+)?/
+
+// 註解和空白字符
+COMMENT: "//" /[^\n]/*
+%ignore COMMENT
+%ignore /\s+/
