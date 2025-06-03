@@ -1,47 +1,68 @@
-// 設定速度為 120 BPM
+// 增強版音樂程式測試檔案
+// 支援音量控制和函式功能
+
+// 設定基本參數
 tempo 120
+volume 0.3
 
-// 播放單個音符
-note "C4"
-note "D4", 1.5
-note "E4", 0.5
-
-// 播放和弦
-chord ["C4", "E4", "G4"]
-chord ["F4", "A4", "C5"], 2.0
-
-// 使用變數
-melody = "G4"
-bass = "C3"
-
-// 簡單的迴圈 - 重複播放3次
-loop 3 {
-    note "A4"
-    note "B4"
-    note "C5"
-}
-
-// 複雜一點的迴圈 - 包含和弦
-loop 2 {
-    chord ["C4", "E4", "G4"], 1.0
-    chord ["F4", "A4", "C5"], 1.0
-    note "G4", 2.0
-}
-
-// 數學運算測試
-tempo 60 + 60
-duration = 1.0 * 2
-
-// 綜合測試 - 一個簡單的旋律
-tempo 100
+// 播放一些基本音符來測試音量
 note "C4", 0.5
-note "D4", 0.5  
+note "D4", 0.5
 note "E4", 0.5
-note "F4", 0.5
-chord ["C4", "E4", "G4"], 1.0
 
-loop 4 {
-    note "G4", 0.25
-    note "A4", 0.25
-    note "B4", 0.5
+// 使用 ref 函式增加音量
+refVolume(0.6)
+note "F4", 0.5
+note "G4", 0.5
+
+// 繼續增加音量
+refVolume(0.9)
+note "A4", 0.5
+note "B4", 0.5
+note "C5", 1.0
+
+// 播放和弦測試音量
+chord ["C4", "E4", "G4"], 1.5
+
+// 定義一個簡單的旋律函式
+fn melody() {
+    note "C4", 0.5
+    note "D4", 0.5
+    note "E4", 0.5
+    note "F4", 0.5
 }
+
+// 定義一個和弦函式
+fn majorChord() {
+    chord ["C4", "E4", "G4"], 1.0
+}
+
+// 定義一個帶參數的函式 (注意：目前參數支援有限)
+fn playWithVolume() {
+    refVolume(0.4)
+    note "G4", 0.5
+    refVolume(0.8)
+    note "G4", 0.5
+}
+
+// 使用函式
+melody()
+majorChord()
+playWithVolume()
+
+// 組合使用
+refTempo(140)
+loop 2 {
+    melody()
+    chord ["F4", "A4", "C5"], 1.0
+}
+
+// 音量淡出效果
+refVolume(1.0)
+note "C5", 0.5
+refVolume(0.7)
+note "B4", 0.5
+refVolume(0.4)
+note "A4", 0.5
+refVolume(0.1)
+note "G4", 1.0

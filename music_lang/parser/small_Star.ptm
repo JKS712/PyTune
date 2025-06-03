@@ -1,0 +1,182 @@
+// 小星星變奏曲 (Twinkle Star Variations)
+// 主題與五個變奏
+
+tempo 100
+volume 0.8
+
+// 原始
+note "C4", 0.5
+note "C4", 0.5
+note "G4", 0.5
+note "G4", 0.5
+note "A4", 0.5
+note "A4", 0.5
+note "G4", 1.0
+
+note "F4", 0.5
+note "F4", 0.5
+note "E4", 0.5
+note "E4", 0.5
+note "D4", 0.5
+note "D4", 0.5
+note "C4", 1.0
+
+note "C4", 0.25
+volume 0.0
+note "C4", 0.25
+volume 0.6
+
+// === 變奏一：八度變奏 (Octave Variation) ===
+// 將旋律移到高八度
+note "C5", 0.5
+note "C5", 0.5
+note "G5", 0.5
+note "G5", 0.5
+note "A5", 0.5
+note "A5", 0.5
+note "G5", 1.0
+
+note "F5", 0.5
+note "F5", 0.5
+note "E5", 0.5
+note "E5", 0.5
+note "D5", 0.5
+note "D5", 0.5
+note "C5", 1.0
+
+// === 變奏二：和弦變奏 (Chord Variation) ===
+refVolume(0.8)
+
+// 用和弦演奏主旋律
+chord ["C4", "E4", "G4"], 0.5
+chord ["C4", "E4", "G4"], 0.5
+chord ["G4", "B4", "D5"], 0.5
+chord ["G4", "B4", "D5"], 0.5
+chord ["A4", "C5", "E5"], 0.5
+chord ["A4", "C5", "E5"], 0.5
+chord ["G4", "B4", "D5"], 1.0
+
+chord ["F4", "A4", "C5"], 0.5
+chord ["F4", "A4", "C5"], 0.5
+chord ["E4", "G4", "B4"], 0.5
+chord ["E4", "G4", "B4"], 0.5
+chord ["D4", "F4", "A4"], 0.5
+chord ["D4", "F4", "A4"], 0.5
+chord ["C4", "E4", "G4"], 1.0
+
+// === 變奏三：節奏變奏 (Rhythm Variation) ===
+refTempo(140)
+refVolume(0.7)
+
+// 快速三連音
+note "C4", 0.33
+note "C4", 0.33
+note "C4", 0.33
+note "G4", 0.33
+note "G4", 0.33
+note "G4", 0.33
+note "A4", 0.25
+note "A4", 0.25
+note "A4", 0.25
+note "A4", 0.25
+note "G4", 1.0
+
+note "F4", 0.33
+note "F4", 0.33
+note "F4", 0.33
+note "E4", 0.33
+note "E4", 0.33
+note "E4", 0.33
+note "D4", 0.25
+note "D4", 0.25
+note "D4", 0.25
+note "D4", 0.25
+note "C4", 1.0
+
+// === 變奏四：低音變奏 (Bass Variation) ===
+refTempo(90)
+refVolume(0.5)
+
+// 在低音區演奏
+note "C3", 0.5
+note "C3", 0.5
+note "G3", 0.5
+note "G3", 0.5
+note "A3", 0.5
+note "A3", 0.5
+note "G3", 1.0
+
+note "F3", 0.5
+note "F3", 0.5
+note "E3", 0.5
+note "E3", 0.5
+note "D3", 0.5
+note "D3", 0.5
+note "C3", 1.0
+
+// === 變奏五：裝飾音變奏 (Ornamental Variation) ===
+refTempo(110)
+refVolume(0.8)
+
+// 加入裝飾音和經過音
+note "C4", 0.25
+note "D4", 0.25
+note "C4", 0.25
+note "D4", 0.25
+note "G4", 0.25
+note "F4", 0.25
+note "G4", 0.25
+note "A4", 0.25
+note "A4", 0.25
+note "B4", 0.25
+note "A4", 0.25
+note "B4", 0.25
+note "G4", 0.5
+note "A4", 0.5
+
+note "F4", 0.25
+note "G4", 0.25
+note "F4", 0.25
+note "G4", 0.25
+note "E4", 0.25
+note "F4", 0.25
+note "E4", 0.25
+note "F4", 0.25
+note "D4", 0.25
+note "E4", 0.25
+note "D4", 0.25
+note "E4", 0.25
+note "C4", 0.5
+note "D4", 0.5
+
+// === 終曲 (Finale) ===
+refTempo(120)
+refVolume(1.0)
+
+// 將所有變奏元素結合
+// 主題 + 和弦
+note "C4", 0.5
+chord ["C4", "E4", "G4"], 0.5
+note "G4", 0.5
+chord ["G4", "B4", "D5"], 0.5
+note "A4", 0.5
+chord ["A4", "C5", "E5"], 0.5
+chord ["G4", "B4", "D5"], 1.0
+
+// 八度呼應
+note "F5", 0.5
+note "F4", 0.5
+note "E5", 0.5
+note "E4", 0.5
+note "D5", 0.5
+note "D4", 0.5
+
+// 壯麗結尾
+refVolume(1.0)
+chord ["C4", "E4", "G4", "C5"], 1.0
+refVolume(0.8)
+chord ["C4", "E4", "G4", "C5"], 1.0
+refVolume(0.6)
+chord ["C4", "E4", "G4", "C5"], 1.0
+refVolume(0.3)
+chord ["C4", "E4", "G4", "C5"], 2.0
