@@ -1,34 +1,12 @@
 # PyTune 執行方式指南
 
-## 📁 專案結構
-
-```
-pyTune/
-├── music_lang/
-│   ├── main.py                 # 主執行檔
-│   ├── parser/
-│   │   ├── __init__.py
-│   │   ├── parser.py           # 語法解析器
-│   │   └── music_lang.lark     # 語法定義檔
-│   ├── audio/
-│   │   ├── __init__.py
-│   │   ├── audio_engine.py     # 音訊引擎
-│   │   └── interpreter.py      # 程式碼解釋器
-│   └── examples/
-│       ├── twinkle_star.ptm     # 小星星範例
-│       ├── for_loop_demo.ptm    # for迴圈範例
-│       └── logic_demo.ptm       # 邏輯控制範例
-├── requirements.txt            # 相依套件
-└── README.md                  # 專案說明
-```
-
 ## 🚀 快速開始
 
 ### 1. 環境設定
 
 #### 安裝 Python 相依套件
 ```bash
-# 進入專案目錄
+# 進入專案目錄(建議使用虛擬環境)
 cd pyTune
 
 # 安裝相依套件
@@ -36,10 +14,12 @@ pip install -r requirements.txt
 ```
 
 #### requirements.txt 內容
-```txt
-lark-parser>=0.12.0
-pygame>=2.1.0
-numpy>=1.21.0
+```
+lark>=1.0.0
+numpy==1.24.3
+pygame==2.5.2
+pytest==7.4.0
+pytest-cov==4.1.0
 ```
 
 ### 2. 基本執行方式
@@ -61,7 +41,7 @@ python main.py --code "tempo 120; note C4, 1.0; chord [C4, E4, G4], 2.0"
 
 #### 方式三：互動模式
 ```bash
-# 進入互動模式
+# 進入互動模式(壞了)
 python main.py --interactive
 ```
 
@@ -70,7 +50,7 @@ python main.py --interactive
 ### 範例 1：執行小星星變奏曲
 ```bash
 cd music_lang
-python main.py examples/twinkle_star.ptm
+python main.py examples\twinkle_star.ptm
 ```
 
 **預期輸出：**
