@@ -15,9 +15,9 @@ pyTune/
 │   │   ├── audio_engine.py     # 音訊引擎
 │   │   └── interpreter.py      # 程式碼解釋器
 │   └── examples/
-│       ├── twinkle_star.ml     # 小星星範例
-│       ├── for_loop_demo.ml    # for迴圈範例
-│       └── logic_demo.ml       # 邏輯控制範例
+│       ├── twinkle_star.ptm     # 小星星範例
+│       ├── for_loop_demo.ptm    # for迴圈範例
+│       └── logic_demo.ptm       # 邏輯控制範例
 ├── requirements.txt            # 相依套件
 └── README.md                  # 專案說明
 ```
@@ -44,13 +44,13 @@ numpy>=1.21.0
 
 ### 2. 基本執行方式
 
-#### 方式一：執行 .ml 檔案
+#### 方式一：執行 .ptm 檔案
 ```bash
 # 進入音樂語言目錄
 cd music_lang
 
 # 執行音樂程式檔案
-python main.py examples/twinkle_star.ml
+python main.py examples/twinkle_star.ptm
 ```
 
 #### 方式二：直接執行程式碼
@@ -70,7 +70,7 @@ python main.py --interactive
 ### 範例 1：執行小星星變奏曲
 ```bash
 cd music_lang
-python main.py examples/twinkle_star.ml
+python main.py examples/twinkle_star.ptm
 ```
 
 **預期輸出：**
@@ -108,182 +108,10 @@ if (mode == 1) {
 }
 "
 ```
-
-## ⚙️ main.py 程式架構
-
-### 主執行檔結構
-```python
-#!/usr/bin/env python3
-"""
-main.py - PyTune 音樂程式語言主執行檔
-"""
-
-import sys
-import argparse
-from parser.parser import MusicLanguageParser
-from audio.interpreter import MusicInterpreter
-from audio.audio_engine import AudioEngine
-
-def play_music_file(filename):
-    """播放音樂檔案"""
-    try:
-        # 1. 讀取檔案
-        with open(filename, 'r', encoding='utf-8') as f:
-            code = f.read()
-        
-        # 2. 解析程式碼
-        print("🔍 解析程式碼...")
-        parser = MusicLanguageParser()
-        ast = parser.parse(code)
-        print("✅ 解析成功！")
-        
-        # 3. 執行音樂程式
-        print("🎵 開始播放音樂...")
-        audio_engine = AudioEngine()
-        interpreter = MusicInterpreter(audio_engine)
-        interpreter.execute(ast)
-        print("🎵 音樂播放完成！")
-        
-    except FileNotFoundError:
-        print(f"❌ 找不到檔案: {filename}")
-    except SyntaxError as e:
-        print(f"❌ 語法錯誤: {e}")
-    except Exception as e:
-        print(f"❌ 執行錯誤: {e}")
-
-def play_music_code(code):
-    """播放程式碼字串"""
-    try:
-        # 解析並執行
-        print("🔍 解析程式碼...")
-        parser = MusicLanguageParser()
-        ast = parser.parse(code)
-        print("✅ 解析成功！")
-        
-        print("🎵 開始播放音樂...")
-        audio_engine = AudioEngine()
-        interpreter = MusicInterpreter(audio_engine)
-        interpreter.execute(ast)
-        print("🎵 音樂播放完成！")
-        
-    except SyntaxError as e:
-        print(f"❌ 語法錯誤: {e}")
-    except Exception as e:
-        print(f"❌ 執行錯誤: {e}")
-
-def interactive_mode():
-    """互動模式"""
-    print("🎹 PyTune 互動模式")
-    print("輸入 'exit' 或 'quit' 離開")
-    print("輸入 'help' 查看說明")
-    
-    audio_engine = AudioEngine()
-    parser = MusicLanguageParser()
-    interpreter = MusicInterpreter(audio_engine)
-    
-    while True:
-        try:
-            code = input(">>> ")
-            
-            if code.lower() in ['exit', 'quit']:
-                break
-            elif code.lower() == 'help':
-                show_help()
-                continue
-            elif code.strip() == '':
-                continue
-            
-            ast = parser.parse(code)
-            interpreter.execute(ast)
-            
-        except KeyboardInterrupt:
-            print("\n👋 再見！")
-            break
-        except Exception as e:
-            print(f"❌ 錯誤: {e}")
-
-def show_help():
-    """顯示說明"""
-    help_text = """
-🎵 PyTune 音樂程式語言說明
-
-基本語法：
-  note C4, 1.0              # 播放音符
-  note [C4, D4, E4], 0.5    # 播放音符陣列
-  chord [C4, E4, G4], 2.0   # 播放和弦
-  tempo 120                 # 設定速度
-  volume 0.8                # 設定音量
-
-控制流：
-  for (i, 0:5) { ... }      # for 迴圈
-  while (condition) { ... } # while 迴圈
-  if (condition) { ... }    # 條件判斷
-
-函式：
-  fn melody() { ... }       # 定義函式
-  melody()                  # 呼叫函式
-  refVolume(0.8)           # ref 函式
-
-範例：
-  tempo 120; note [C4, E4, G4], 0.5; chord [C4, E4, G4], 1.0
-"""
-    print(help_text)
-
-def main():
-    """主函式"""
-    parser = argparse.ArgumentParser(
-        description="PyTune - 音樂程式語言執行器",
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    
-    parser.add_argument(
-        'file', 
-        nargs='?', 
-        help='要執行的 .ml 音樂程式檔案'
-    )
-    
-    parser.add_argument(
-        '--code', '-c',
-        help='直接執行程式碼字串'
-    )
-    
-    parser.add_argument(
-        '--interactive', '-i',
-        action='store_true',
-        help='進入互動模式'
-    )
-    
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='顯示詳細執行資訊'
-    )
-    
-    args = parser.parse_args()
-    
-    # 設定詳細模式
-    if args.verbose:
-        import logging
-        logging.basicConfig(level=logging.DEBUG)
-    
-    # 執行模式判斷
-    if args.interactive:
-        interactive_mode()
-    elif args.code:
-        play_music_code(args.code)
-    elif args.file:
-        play_music_file(args.file)
-    else:
-        print("❌ 請指定要執行的檔案或使用 --help 查看說明")
-        parser.print_help()
-
-if __name__ == "__main__":
-    main()
-```
-
+#
 ## 🎼 程式碼範例檔案
 
-### twinkle_star.ml
+### twinkle_star.ptm
 ```musiclang
 // 小星星變奏曲
 tempo 100
@@ -299,7 +127,7 @@ fn mainTheme() {
 mainTheme()
 ```
 
-### for_loop_demo.ml
+### for_loop_demo.ptm
 ```musiclang
 // for 迴圈範例
 tempo 120
@@ -316,7 +144,7 @@ for (octave, 3:6) {
 }
 ```
 
-### logic_demo.ml
+### logic_demo.ptm
 ```musiclang
 // 邏輯控制範例
 tempo 100
@@ -346,10 +174,10 @@ python main.py [OPTIONS] [FILE]
 ### 參數說明
 | 參數 | 說明 | 範例 |
 |------|------|------|
-| `FILE` | 要執行的 .ml 檔案 | `python main.py song.ml` |
+| `FILE` | 要執行的 .ptm 檔案 | `python main.py song.ptm` |
 | `--code`, `-c` | 直接執行程式碼 | `python main.py -c "note C4, 1.0"` |
 | `--interactive`, `-i` | 互動模式 | `python main.py -i` |
-| `--verbose`, `-v` | 顯示詳細資訊 | `python main.py -v song.ml` |
+| `--verbose`, `-v` | 顯示詳細資訊 | `python main.py -v song.ptm` |
 | `--help`, `-h` | 顯示說明 | `python main.py -h` |
 
 ## 🐛 除錯與錯誤處理
@@ -364,7 +192,7 @@ python main.py [OPTIONS] [FILE]
 
 #### 2. 檔案不存在
 ```bash
-❌ 找不到檔案: song.ml
+❌ 找不到檔案: song.ptm
 ```
 **解決方法：** 確認檔案路徑正確
 
@@ -377,7 +205,7 @@ python main.py [OPTIONS] [FILE]
 ### 除錯模式
 ```bash
 # 使用 verbose 模式查看詳細執行過程
-python main.py --verbose examples/twinkle_star.ml
+python main.py --verbose examples/twinkle_star.ptm
 ```
 
 ## 🎯 效能調優
@@ -405,9 +233,9 @@ for (section, 0:10) {
 ## 📝 開發模式
 
 ### 建立新的音樂程式
-1. 建立 `.ml` 檔案
+1. 建立 `.ptm` 檔案
 2. 編寫音樂程式碼
-3. 執行測試：`python main.py your_song.ml`
+3. 執行測試：`python main.py your_song.ptm`
 
 ### 除錯流程
 1. 檢查語法：使用 `--verbose` 模式
