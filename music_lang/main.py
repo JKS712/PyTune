@@ -16,7 +16,7 @@ def import_audio_modules():
     """動態導入音訊模組"""
     try:
         # 嘗試導入增強音訊引擎
-        from audio.enhanced_audio_engine import EnhancedAudioEngine
+        from audio.audio_engine import EnhancedAudioEngine
         print("✅ 成功載入增強音訊引擎（支援音色）")
         return EnhancedAudioEngine, 'enhanced'
     except ImportError as e:
@@ -36,7 +36,7 @@ def import_parser():
     """動態導入解析器"""
     try:
         # 嘗試導入支援音色的解析器
-        from parser.parser_with_instruments import MusicLanguageParser
+        from parser.parser import MusicLanguageParser
         print("✅ 成功載入支援音色的解析器")
         return MusicLanguageParser, True
     except ImportError:
