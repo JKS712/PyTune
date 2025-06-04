@@ -1,17 +1,29 @@
-// music_lang.lark - 音樂程式語言語法定義
+// music_lang.lark - 簡化音符語法版本
 
 ?start: statement*
 
 ?statement: note_stmt
           | chord_stmt  
           | tempo_stmt
+          | volume_stmt
           | loop_stmt
           | fn_stmt
+          | fn_call_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
           | assignment
           | expression ";"
 
-// 音符語句
-note_stmt: "note" note_literal ("," duration)?
+// 音符語句 - 支援單個音符和音符陣列
+note_stmt: "note" note_value ("," duration)?
+
+// 音符值可以是單個音符或音符陣列
+note_value: note_literal
+          | note_array
+
+// 音符陣列
+note_array: "[" note_list "]"
 
 // 和弦語句  
 chord_stmt: "chord" chord_literal ("," duration)?
@@ -19,22 +31,69 @@ chord_stmt: "chord" chord_literal ("," duration)?
 // 速度設定
 tempo_stmt: "tempo" number
 
+// 音量設定
+volume_stmt: "volume" number
+
 // 迴圈語句
 loop_stmt: "loop" number "{" statement* "}"
+
+// if 條件語句
+if_stmt: "if" "(" logical_expr ")" "{" statement* "}" elseif_clause* else_clause?
+
+elseif_clause: "elseif" "(" logical_expr ")" "{" statement* "}"
+
+else_clause: "else" "{" statement* "}"
+
+// while 迴圈語句
+while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
+
+// for 迴圈語句
+for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
+
+// 範圍表達式
+range_expr: number ":" number
 
 // 函數定義
 fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
 
+// 函數調用語句 - 修改優先級，讓 ref 函數優先匹配
+fn_call_stmt: ref_identifier "(" argument_list? ")"
+            | identifier "(" argument_list? ")"
+
 // 參數列表
 parameter_list: identifier ("," identifier)*
+
+// 參數列表
+argument_list: expression ("," expression)*
 
 // 賦值語句
 assignment: identifier "=" expression
 
 // 表達式
-?expression: arithmetic_expr
+?expression: logical_expr
            | note_literal
            | chord_literal
+
+// 邏輯表達式
+?logical_expr: logical_or
+
+?logical_or: logical_or "or" logical_and   -> or_expr
+           | logical_and
+
+?logical_and: logical_and "and" comparison -> and_expr
+            | comparison
+
+?comparison: arithmetic_expr "==" arithmetic_expr  -> eq
+           | arithmetic_expr "!=" arithmetic_expr  -> neq
+           | arithmetic_expr "<" arithmetic_expr   -> lt
+           | arithmetic_expr ">" arithmetic_expr   -> gt
+           | arithmetic_expr "<=" arithmetic_expr  -> lte
+           | arithmetic_expr ">=" arithmetic_expr  -> gte
+           | "not" logical_primary                 -> not_expr
+           | logical_primary
+
+?logical_primary: "(" logical_expr ")"
+                | arithmetic_expr
 
 // 算術表達式
 ?arithmetic_expr: arithmetic_expr "+" term   -> add
@@ -52,22 +111,23 @@ assignment: identifier "=" expression
      | identifier
 
 // 基本類型
-note_literal: NOTE_STRING
+note_literal: SIMPLE_NOTE
 chord_literal: "[" note_list "]"
 note_list: note_literal ("," note_literal)*
 duration: number
 identifier: IDENTIFIER
+ref_identifier: REF_IDENTIFIER
 
-// Token 定義
-NOTE_STRING: "\"" NOTE_PATTERN "\""
-NOTE_PATTERN: /[A-Ga-g]#?[0-9]/
+// Token 定義 - 簡化版本
+SIMPLE_NOTE: /[A-Ga-g][#b]?[0-9]/
 
 IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+REF_IDENTIFIER: /ref[A-Z][a-zA-Z0-9_]*/
 
 number: NUMBER
-NUMBER: /\d+(\.\d+)?/
+NUMBER: /[0-9]+(\.[0-9]+)?/
 
 // 註解和空白字符
-COMMENT: "//" /[^\n]/*
+COMMENT: "//" /[^\n]*/
 %ignore COMMENT
 %ignore /\s+/

@@ -1,0 +1,201 @@
+// For迴圈小星星變奏曲
+// 展示 for (i, 0:10) { } 語法的使用
+
+tempo 100
+volume 0.8
+
+// === 基本主題 ===
+fn basicTheme() {
+    note [C4, C4, G4, G4, A4, A4], 0.5
+    note G4, 1.0
+    note [F4, F4, E4, E4, D4, D4], 0.5
+    note C4, 1.0
+}
+
+// === 使用 for 迴圈的八度遞增變奏 ===
+fn octaveProgression() {
+    // 從第3八度到第6八度
+    for (octave, 3:7) {
+        if (octave == 3) {
+            note [C3, C3, G3, G3], 0.5
+        } elseif (octave == 4) {
+            note [C4, C4, G4, G4], 0.5
+        } elseif (octave == 5) {
+            note [C5, C5, G5, G5], 0.5
+        } else {
+            note [C6, C6, G6, G6], 0.5
+        }
+    }
+}
+
+// === 使用 for 迴圈的節拍變化 ===
+fn rhythmVariation() {
+    // 節拍從慢到快
+    for (speed, 1:6) {
+        tempo_val = speed * 20 + 80  // 100, 120, 140, 160, 180
+        refTempo(tempo_val)
+        
+        note C4, 0.5
+        note G4, 0.5
+        note A4, 0.5
+        note G4, 0.5
+    }
+}
+
+// === 使用 for 迴圈的音量淡入淡出 ===
+fn volumeFade() {
+    // 淡入效果
+    for (vol, 1:11) {
+        volume_val = vol * 0.1  // 0.1, 0.2, ..., 1.0
+        refVolume(volume_val)
+        note C4, 0.3
+        chord [C4, E4, G4], 0.3
+    }
+    
+    // 淡出效果
+    for (vol, 1:11) {
+        fade_vol = 1.0 - vol * 0.1  // 0.9, 0.8, ..., 0.0
+        refVolume(fade_vol)
+        note G4, 0.3
+        chord [G4, B4, D5], 0.3
+    }
+}
+
+// === 使用 for 迴圈創建音階 ===
+fn scalePlay() {
+    // C大調音階上行
+    notes = [C4, D4, E4, F4, G4, A4, B4, C5]
+    
+    for (i, 0:8) {
+        if (i == 0) {
+            note C4, 0.5
+        } elseif (i == 1) {
+            note D4, 0.5
+        } elseif (i == 2) {
+            note E4, 0.5
+        } elseif (i == 3) {
+            note F4, 0.5
+        } elseif (i == 4) {
+            note G4, 0.5
+        } elseif (i == 5) {
+            note A4, 0.5
+        } elseif (i == 6) {
+            note B4, 0.5
+        } else {
+            note C5, 0.5
+        }
+    }
+    
+    // 下行
+    for (i, 0:8) {
+        if (i == 0) {
+            note C5, 0.5
+        } elseif (i == 1) {
+            note B4, 0.5
+        } elseif (i == 2) {
+            note A4, 0.5
+        } elseif (i == 3) {
+            note G4, 0.5
+        } elseif (i == 4) {
+            note F4, 0.5
+        } elseif (i == 5) {
+            note E4, 0.5
+        } elseif (i == 6) {
+            note D4, 0.5
+        } else {
+            note C4, 0.5
+        }
+    }
+}
+
+// === 使用 for 迴圈的和弦進行 ===
+fn chordProgression() {
+    for (chord_num, 0:4) {
+        if (chord_num == 0) {
+            // I 級和弦
+            chord [C4, E4, G4], 1.0
+        } elseif (chord_num == 1) {
+            // vi 級和弦  
+            chord [A3, C4, E4], 1.0
+        } elseif (chord_num == 2) {
+            // IV 級和弦
+            chord [F3, A3, C4], 1.0
+        } else {
+            // V 級和弦
+            chord [G3, B3, D4], 1.0
+        }
+    }
+}
+
+// === 複雜的 for 迴圈嵌套 ===
+fn nestedLoops() {
+    // 外迴圈：變奏次數
+    for (variation, 0:3) {
+        // 內迴圈：每個變奏重複次數
+        for (repeat, 0:2) {
+            if (variation == 0) {
+                // 第一變奏：單音
+                note [C4, G4], 0.5
+            } elseif (variation == 1) {
+                // 第二變奏：和弦
+                chord [C4, E4, G4], 0.5
+            } else {
+                // 第三變奏：高八度
+                note [C5, G5], 0.5
+            }
+        }
+    }
+}
+
+// === 主程序執行 ===
+
+// 演奏基本主題
+basicTheme()
+
+// for 迴圈變奏演示
+refTempo(100)
+refVolume(0.8)
+
+// 1. 八度遞增
+octaveProgression()
+
+// 短暫停頓
+note C4, 0.25
+volume 0.0
+note C4, 0.25
+volume 0.6
+
+// 2. 節拍變化
+rhythmVariation()
+
+// 3. 音量淡入淡出
+refTempo(100)
+volumeFade()
+
+// 4. 音階演奏
+refVolume(0.7)
+scalePlay()
+
+// 5. 和弦進行
+refVolume(0.8)
+chordProgression()
+
+// 6. 嵌套迴圈
+refVolume(0.6)
+nestedLoops()
+
+// === 終曲：使用 for 迴圈的漸強終結 ===
+for (intensity, 1:6) {
+    final_volume = intensity * 0.2
+    final_tempo = 80 + intensity * 10
+    
+    refVolume(final_volume)
+    refTempo(final_tempo)
+    
+    chord [C4, E4, G4, C5], 0.8
+}
+
+// 最終強烈和弦
+refVolume(1.0)
+refTempo(120)
+chord [C3, C4, E4, G4, C5], 2.0

@@ -1,0 +1,294 @@
+// 智能音樂演示程式 - 簡化版
+// 展示所有邏輯控制功能，避免複雜函數調用
+
+tempo 100
+volume 0.8
+
+// === 全域變數設定 ===
+mood = 2          // 1=快樂, 2=憂鬱, 3=神秘
+energy_level = 8  // 1-10 能量等級
+time_of_day = 3   // 1=早晨, 2=下午, 3=夜晚
+user_preference = 2 // 1=古典, 2=現代, 3=爵士
+complexity = 10    // 1-10 複雜度等級
+current_section = 0
+variation_count = 0
+dynamic_tempo = 100
+base_volume = 7
+octave_choice = 4
+
+// === 智能初始化 ===
+// 複合條件判斷：根據心情和時間調整參數
+if (mood == 1 and time_of_day == 1) {
+    // 快樂 + 早晨 = 清新活力
+    dynamic_tempo = 120
+    base_volume = 8
+    refTempo(dynamic_tempo)
+    refVolume(0.8)
+} elseif (mood == 1 and time_of_day == 2) {
+    // 快樂 + 下午 = 輕鬆愉快
+    dynamic_tempo = 110
+    base_volume = 7
+    refTempo(dynamic_tempo)
+    refVolume(0.7)
+} elseif (mood == 2 and time_of_day == 3) {
+    // 憂鬱 + 夜晚 = 深沉寧靜
+    dynamic_tempo = 70
+    base_volume = 4
+    refTempo(dynamic_tempo)
+    refVolume(0.4)
+} else {
+    // 其他組合的默認設定
+    dynamic_tempo = 100
+    base_volume = 6
+    refTempo(dynamic_tempo)
+    refVolume(0.6)
+}
+
+// === 主題演奏：展示多重條件判斷 ===
+fn mainTheme() {
+    // 根據用戶偏好和音域選擇演奏風格
+    if (user_preference == 1 and octave_choice >= 4) {
+        // 古典風格 + 中高音域
+        note [C4, C4, G4, G4, A4, A4], 0.5
+        note G4, 1.0
+        note [F4, F4, E4, E4, D4, D4], 0.5
+        note C4, 1.0
+    } elseif (user_preference == 1 and octave_choice < 4) {
+        // 古典風格 + 低音域
+        note [C3, C3, G3, G3, A3, A3], 0.5
+        note G3, 1.0
+        note [F3, F3, E3, E3, D3, D3], 0.5
+        note C3, 1.0
+    } elseif (user_preference == 2) {
+        // 現代風格：節奏變化
+        note [C4, C4], 0.25
+        note [G4, G4], 0.25
+        note [A4, A4, A4], 0.33
+        note G4, 1.0
+    } else {
+        // 爵士風格：和弦配合
+        note C4, 0.5
+        chord [C4, E4, G4], 0.5
+        note G4, 0.5
+        chord [G4, B4, D5], 0.5
+    }
+}
+
+// === 動態變奏：展示邏輯運算子 ===
+fn dynamicVariation() {
+    variation_type = 1
+    
+    // 使用 and, or, not 邏輯運算子
+    if (energy_level >= 7 and mood == 1 and time_of_day != 3) {
+        // 高能量 + 快樂 + 非夜晚：活潑變奏
+        variation_type = 1
+        refTempo(dynamic_tempo + 40)
+        note [C4, D4, E4, F4, G4, A4], 0.25
+        note [A4, G4, F4, E4, D4, C4], 0.25
+    } elseif (energy_level <= 4 or mood == 2) {
+        // 低能量 或 憂鬱：安靜變奏
+        variation_type = 2
+        refTempo(dynamic_tempo - 20)
+        note [C4, E4, G4], 0.8
+        note [G4, E4, C4], 0.8
+    } elseif (not (mood == 2) and complexity >= 6) {
+        // 非憂鬱 且 高複雜度：複雜變奏
+        variation_type = 3
+        refTempo(dynamic_tempo + 20)
+        chord [C4, E4, G4, B4], 0.5
+        chord [F4, A4, C5, E5], 0.5
+        chord [G4, B4, D5, F5], 0.5
+    } else {
+        // 默認變奏
+        variation_type = 4
+        chord [C4, E4, G4], 0.5
+        chord [F4, A4, C5], 0.5
+    }
+}
+
+// === while 循環演示：動態音量控制 ===
+fn volumeDemo() {
+    vol_level = base_volume
+    
+    while (vol_level > 2) {
+        // 根據音量等級調整演奏
+        if (vol_level >= 7) {
+            refVolume(0.9)
+            note [C5, E5, G5], 0.5
+        } elseif (vol_level >= 5) {
+            refVolume(0.7)
+            note [C4, E4, G4], 0.5
+        } elseif (vol_level >= 3) {
+            refVolume(0.5)
+            note [C3, E3, G3], 0.5
+        } else {
+            refVolume(0.3)
+            note [C2, E2, G2], 0.5
+        }
+        
+        vol_level = vol_level - 2
+    }
+}
+
+// === 比較運算子完整演示 ===
+fn comparisonDemo() {
+    test_value = energy_level
+    
+    if (test_value == 8) {
+        // 等於：精確匹配
+        note C5, 0.5
+    } elseif (test_value != 5) {
+        // 不等於：排除特定值
+        note D5, 0.5
+    } elseif (test_value > 6) {
+        // 大於：高於閾值
+        note E5, 0.5
+    } elseif (test_value < 4) {
+        // 小於：低於閾值
+        note F3, 0.5
+    } elseif (test_value >= 7) {
+        // 大於等於：包含邊界
+        note G5, 0.5
+    } elseif (test_value <= 3) {
+        // 小於等於：包含邊界
+        note A3, 0.5
+    } else {
+        // 默認情況
+        note C4, 0.5
+    }
+}
+
+// === 複雜條件組合演示 ===
+fn complexConditions() {
+    // 三重條件組合
+    if (mood == 1 and energy_level >= 7 and user_preference == 2) {
+        // 快樂 + 高能量 + 現代風格
+        refTempo(140)
+        note [C5, D5, E5, F5], 0.25
+        chord [C4, E4, G4, C5], 0.5
+    } elseif (mood == 2 or energy_level <= 3 or time_of_day == 3) {
+        // 憂鬱 或 低能量 或 夜晚
+        refTempo(80)
+        note [C3, D3, E3], 0.8
+        chord [C3, E3, G3], 1.0
+    } elseif (not (mood == 2) and not (energy_level < 5)) {
+        // 非憂鬱 且 非低能量
+        refTempo(120)
+        note [C4, G4, C5], 0.5
+        chord [C4, E4, G4], 0.5
+    } else {
+        // 其他所有情況
+        refTempo(100)
+        note C4, 0.5
+        chord [C4, E4, G4], 0.5
+    }
+}
+
+// === 主程序執行 ===
+
+// 1. 演奏主題
+mainTheme()
+
+// 2. 使用 while 循環進行多段演奏
+section_counter = 0
+while (section_counter < 4) {
+    
+    if (section_counter == 0) {
+        // 第一段：動態變奏
+        dynamicVariation()
+    } elseif (section_counter == 1) {
+        // 第二段：音量演示
+        volumeDemo()
+    } elseif (section_counter == 2) {
+        // 第三段：比較運算演示
+        comparisonDemo()
+    } else {
+        // 第四段：複雜條件演示
+        complexConditions()
+    }
+    
+    // 段落間的動態調整
+    if (section_counter < 3) {
+        if (mood == 1 and section_counter >= 1) {
+            // 快樂模式後半段提升能量
+            energy_level = energy_level + 1
+            if (energy_level > 10) {
+                energy_level = 10
+            }
+        } elseif (mood == 2) {
+            // 憂鬱模式逐漸降低能量
+            energy_level = energy_level - 1
+            if (energy_level < 1) {
+                energy_level = 1
+            }
+        }
+    }
+    
+    section_counter = section_counter + 1
+}
+
+// 3. 智能終曲選擇
+finale_style = 0
+
+if (mood == 1 and energy_level >= 8) {
+    finale_style = 1  // 壯麗終曲
+} elseif (mood == 2 and time_of_day == 3) {
+    finale_style = 2  // 安靜終曲
+} elseif (user_preference == 3 and complexity >= 7) {
+    finale_style = 3  // 爵士終曲
+} else {
+    finale_style = 4  // 經典終曲
+}
+
+if (finale_style == 1) {
+    // 壯麗終曲
+    refTempo(dynamic_tempo + 30)
+    refVolume(1.0)
+    chord [C4, E4, G4, C5], 0.5
+    chord [F4, A4, C5, F5], 0.5
+    refVolume(0.8)
+    chord [C4, E4, G4, C5], 1.0
+    refVolume(0.6)
+    chord [C4, E4, G4, C5], 2.0
+} elseif (finale_style == 2) {
+    // 安靜終曲
+    refTempo(dynamic_tempo - 40)
+    refVolume(0.6)
+    note C3, 1.0
+    refVolume(0.4)
+    note C3, 2.0
+} elseif (finale_style == 3) {
+    // 爵士終曲
+    refTempo(dynamic_tempo)
+    refVolume(0.8)
+    chord [C4, E4, G4, B4], 0.5
+    chord [F4, A4, C5, E5], 0.5
+    chord [C4, E4, G4, B4, D5], 2.0
+} else {
+    // 經典終曲
+    refTempo(dynamic_tempo - 10)
+    refVolume(0.9)
+    note [C4, E4, G4], 0.5
+    chord [C4, E4, G4], 0.5
+    chord [C4, E4, G4, C5], 2.0
+}
+
+// 4. 使用固定循環做最終收尾
+loop 3 {
+    refVolume(0.3)
+    note C4, 0.5
+}
+
+// 5. 最終條件檢查
+if (mood == 1 and energy_level >= 7) {
+    // 快樂高能：額外歡快結尾
+    refTempo(140)
+    refVolume(0.9)
+    note [C5, D5, E5], 0.3
+    chord [C4, E4, G4, C5], 1.0
+} elseif (not (mood == 1) and energy_level <= 4) {
+    // 非快樂低能：安靜結尾
+    refTempo(60)
+    refVolume(0.3)
+    note C3, 2.0
+}

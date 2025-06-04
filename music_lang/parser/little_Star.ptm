@@ -1,0 +1,198 @@
+// 小星星變奏曲 (Twinkle Star Variations) - 新語法版本
+// 主題與五個變奏，使用音符陣列和無引號音符
+
+tempo 80
+volume 0.8
+
+// === 主函數：小星星主題 ===
+fn mainTheme() {
+    // 第一段：一閃一閃亮晶晶
+    note [C4, C4, G4, G4, A4, A4], 0.5
+    note G4, 1.0
+    
+    // 第二段：掛在天空放光明
+    note [F4, F4, E4, E4, D4, D4], 0.5
+    note C4, 1.0
+}
+
+// === 變奏一：八度變奏函數 ===
+fn octaveVariation() {
+    // 高八度演奏
+    note [C5, C5, G5, G5, A5, A5], 0.5
+    note G5, 1.0
+    note [F5, F5, E5, E5, D5, D5], 0.5
+    note C5, 1.0
+}
+
+// === 變奏二：和弦變奏函數 ===
+fn chordVariation() {
+    refVolume(0.8)
+    
+    // 第一段和弦
+    chord [C4, E4, G4], 0.5
+    chord [C4, E4, G4], 0.5
+    chord [G4, B4, D5], 0.5
+    chord [G4, B4, D5], 0.5
+    chord [A4, C5, E5], 0.5
+    chord [A4, C5, E5], 0.5
+    chord [G4, B4, D5], 1.0
+    
+    // 第二段和弦
+    chord [F4, A4, C5], 0.5
+    chord [F4, A4, C5], 0.5
+    chord [E4, G4, B4], 0.5
+    chord [E4, G4, B4], 0.5
+    chord [D4, F4, A4], 0.5
+    chord [D4, F4, A4], 0.5
+    chord [C4, E4, G4], 1.0
+}
+
+// === 變奏三：節奏變奏函數 ===
+fn rhythmVariation() {
+    refTempo(120)
+    refVolume(0.7)
+    
+    // 三連音節奏 - 第一段
+    note [C4, C4, C4], 0.33
+    note [G4, G4, G4], 0.33
+    note [A4, A4, A4, A4], 0.25
+    note G4, 1.0
+    
+    // 三連音節奏 - 第二段
+    note [F4, F4, F4], 0.33
+    note [E4, E4, E4], 0.33
+    note [D4, D4, D4, D4], 0.25
+    note C4, 1.0
+}
+
+// === 變奏四：低音變奏函數 ===
+fn bassVariation() {
+    refTempo(90)
+    refVolume(0.5)
+    
+    // 低音八度演奏
+    note [C3, C3, G3, G3, A3, A3], 0.5
+    note G3, 1.0
+    note [F3, F3, E3, E3, D3, D3], 0.5
+    note C3, 1.0
+}
+
+// === 變奏五：裝飾音變奏函數 ===
+fn ornamentalVariation() {
+    refTempo(110)
+    refVolume(0.8)
+    
+    // 裝飾音變奏 - 第一段
+    note [C4, D4, C4, D4], 0.25
+    note [G4, F4, G4, A4], 0.25
+    note [A4, B4, A4, B4], 0.25
+    note [G4, A4], 0.5
+    
+    // 裝飾音變奏 - 第二段
+    note [F4, G4, F4, G4], 0.25
+    note [E4, F4, E4, F4], 0.25
+    note [D4, E4, D4, E4], 0.25
+    note [C4, D4], 0.5
+}
+
+// === 終曲函數 ===
+fn finaleSection() {
+    refTempo(120)
+    refVolume(1.0)
+    
+    // 主題與和弦交織
+    note C4, 0.5
+    chord [C4, E4, G4], 0.5
+    note G4, 0.5
+    chord [G4, B4, D5], 0.5
+    note A4, 0.5
+    chord [A4, C5, E5], 0.5
+    chord [G4, B4, D5], 1.0
+    
+    // 八度呼應
+    note [F5, F4], 0.5
+    note [E5, E4], 0.5
+    note [D5, D4], 0.5
+    
+    // 漸弱結尾
+    refVolume(1.0)
+    chord [C4, E4, G4, C5], 1.0
+    refVolume(0.8)
+    chord [C4, E4, G4, C5], 1.0
+    refVolume(0.6)
+    chord [C4, E4, G4, C5], 1.0
+    refVolume(0.3)
+    chord [C4, E4, G4, C5], 2.0
+}
+
+// === 過場音效函數 ===
+fn transitionPause() {
+    note C4, 0.25
+    volume 0.0
+    note C4, 0.25
+    volume 0.6
+}
+
+// === 快速演奏變奏 ===
+fn rapidVariation() {
+    refTempo(160)
+    refVolume(0.8)
+    
+    // 快速音階上行
+    note [C4, D4, E4, F4, G4, A4, B4, C5], 0.125
+    
+    // 快速音階下行
+    note [C5, B4, A4, G4, F4, E4, D4, C4], 0.125
+}
+
+// === 混合變奏 ===
+fn mixedVariation() {
+    refTempo(100)
+    refVolume(0.9)
+    
+    // 混合單音、陣列音符和和弦
+    note [C4, C4], 0.25
+    chord [C4, E4, G4], 0.5
+    note [G4, G4], 0.25
+    chord [G4, B4, D5], 0.5
+    note [A4, A4], 0.25
+    chord [A4, C5, E5], 0.5
+    chord [G4, B4, D5], 1.0
+    
+    // 複合節奏
+    note [F4, F4, E4, E4], 0.25
+    note [D4, D4], 0.5
+    chord [C4, E4, G4], 1.0
+}
+
+// === 主程序執行 ===
+
+// 演奏原始主題
+mainTheme()
+
+// 過場
+transitionPause()
+
+// 演奏變奏一：八度變奏
+octaveVariation()
+
+// 演奏變奏二：和弦變奏  
+chordVariation()
+
+// 演奏變奏三：節奏變奏
+rhythmVariation()
+
+// 演奏變奏四：低音變奏
+bassVariation()
+
+// 演奏變奏五：裝飾音變奏
+ornamentalVariation()
+
+// 新增變奏：快速演奏
+rapidVariation()
+
+// 新增變奏：混合變奏
+mixedVariation()
+
+// 演奏終曲
+finaleSection()
