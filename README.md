@@ -1,622 +1,417 @@
-# PyTune 完整語法規則與用法
+# PyTune 執行方式指南
 
-## 1. Lexer (詞法分析器)
-
-### Token 定義
-
-```lark
-// 基本 Token
-NOTE_STRING: "\"" NOTE_PATTERN "\""           // 音符字符串，如 "C4", "A#3"
-NOTE_BARE: NOTE_PATTERN                       // 無引號音符，如 C4, A#3
-NOTE_PATTERN: /[A-Ga-g][#b]?[0-9]/          // 音符模式：音名 + 可選升降號 + 八度
-IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/         // 標識符 (變數名、函式名)
-NUMBER: /[0-9]+(\.[0-9]+)?/                  // 數字 (整數或浮點數)
-COMMENT: "//" /[^\n]*/                       // 註解
-
-// 關鍵字 Token
-"note"      // 音符播放關鍵字
-"chord"     // 和弦播放關鍵字
-"tempo"     // 速度設定關鍵字
-"volume"    // 音量設定關鍵字
-"loop"      // 固定次數迴圈關鍵字
-"while"     // 條件迴圈關鍵字
-"for"       // 範圍迴圈關鍵字
-"if"        // 條件判斷關鍵字
-"elseif"    // 條件分支關鍵字
-"else"      // 其他分支關鍵字
-"fn"        // 函式定義關鍵字
-
-// 特殊 Token (用於內建函式)
-REF_IDENTIFIER: /ref[A-Z][a-zA-Z0-9_]*/      // ref 函式，如 refVolume, refTempo
-
-// 運算符
-"+"  "-"  "*"  "/"                           // 算術運算符
-"="                                          // 賦值運算符
-"=="  "!="  "<"  ">"  "<="  ">="            // 比較運算符
-"and"  "or"  "not"                           // 邏輯運算符
-":"                                          // 範圍運算符
-
-// 分隔符和括號
-"("  ")"  "{"  "}"  "["  "]"                // 括號
-","  ";"                                     // 分隔符
-```
-
-### Token 範例
+## 📁 專案結構
 
 ```
-輸入: note [C4, E4, G4], 1.0
-Token 序列:
-- KEYWORD("note")
-- LSQB("[")
-- NOTE_BARE("C4")
-- COMMA(",")
-- NOTE_BARE("E4") 
-- COMMA(",")
-- NOTE_BARE("G4")
-- RSQB("]")
-- COMMA(",")
-- NUMBER(1.0)
+pyTune/
+├── music_lang/
+│   ├── main.py                 # 主執行檔
+│   ├── parser/
+│   │   ├── __init__.py
+│   │   ├── parser.py           # 語法解析器
+│   │   └── music_lang.lark     # 語法定義檔
+│   ├── audio/
+│   │   ├── __init__.py
+│   │   ├── audio_engine.py     # 音訊引擎
+│   │   └── interpreter.py      # 程式碼解釋器
+│   └── examples/
+│       ├── twinkle_star.ml     # 小星星範例
+│       ├── for_loop_demo.ml    # for迴圈範例
+│       └── logic_demo.ml       # 邏輯控制範例
+├── requirements.txt            # 相依套件
+└── README.md                  # 專案說明
 ```
 
-## 2. Parser (語法分析器)
+## 🚀 快速開始
 
-### 完整語法規則
+### 1. 環境設定
 
-```lark
-// 程式結構
-?start: statement*                           // 程式 = 語句列表
+#### 安裝 Python 相依套件
+```bash
+# 進入專案目錄
+cd pyTune
 
-// 語句類型
-?statement: note_stmt                        // 音符語句
-          | chord_stmt                       // 和弦語句  
-          | tempo_stmt                       // 速度語句
-          | volume_stmt                      // 音量語句
-          | loop_stmt                        // 固定次數迴圈語句
-          | while_stmt                       // 條件迴圈語句
-          | for_stmt                         // 範圍迴圈語句
-          | if_stmt                          // 條件判斷語句
-          | fn_stmt                          // 函式定義
-          | fn_call_stmt                     // 函式呼叫
-          | assignment                       // 賦值語句
-          | expression ";"                   // 表達式語句
-
-// === 音樂語句 ===
-
-// 音符語句 - 支援單個音符和音符陣列
-note_stmt: "note" note_value ("," duration)?
-
-// 音符值可以是單個音符或音符陣列
-note_value: note_literal
-          | note_array
-
-// 音符陣列
-note_array: "[" note_list "]"
-
-// 和弦語句  
-chord_stmt: "chord" chord_literal ("," duration)?
-
-// 速度設定
-tempo_stmt: "tempo" number
-
-// 音量設定
-volume_stmt: "volume" number
-
-// === 控制流語句 ===
-
-// 固定次數迴圈語句
-loop_stmt: "loop" number "{" statement* "}"
-
-// 條件迴圈語句
-while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
-
-// 範圍迴圈語句
-for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
-
-// 範圍表達式
-range_expr: number ":" number
-
-// 條件判斷語句
-if_stmt: "if" "(" logical_expr ")" "{" statement* "}" elseif_clause* else_clause?
-
-elseif_clause: "elseif" "(" logical_expr ")" "{" statement* "}"
-
-else_clause: "else" "{" statement* "}"
-
-// === 函式語句 ===
-
-// 函數定義
-fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
-
-// 函數調用語句 - ref 函數優先匹配
-fn_call_stmt: ref_identifier "(" argument_list? ")"
-            | identifier "(" argument_list? ")"
-
-// 參數列表
-parameter_list: identifier ("," identifier)*
-
-// 參數列表
-argument_list: expression ("," expression)*
-
-// 賦值語句
-assignment: identifier "=" expression
-
-// === 表達式系統 ===
-
-// 表達式
-?expression: logical_expr
-           | note_literal
-           | chord_literal
-
-// 邏輯表達式
-?logical_expr: logical_or
-
-?logical_or: logical_or "or" logical_and   -> or_expr
-           | logical_and
-
-?logical_and: logical_and "and" comparison -> and_expr
-            | comparison
-
-?comparison: arithmetic_expr "==" arithmetic_expr  -> eq
-           | arithmetic_expr "!=" arithmetic_expr  -> neq
-           | arithmetic_expr "<" arithmetic_expr   -> lt
-           | arithmetic_expr ">" arithmetic_expr   -> gt
-           | arithmetic_expr "<=" arithmetic_expr  -> lte
-           | arithmetic_expr ">=" arithmetic_expr  -> gte
-           | "not" logical_primary                 -> not_expr
-           | logical_primary
-
-?logical_primary: "(" logical_expr ")"
-                | arithmetic_expr
-
-// 算術表達式
-?arithmetic_expr: arithmetic_expr "+" term   -> add
-                | arithmetic_expr "-" term   -> sub
-                | term
-
-?term: term "*" factor -> mul
-     | term "/" factor -> div
-     | factor
-
-?factor: "(" arithmetic_expr ")"
-       | atom
-
-?atom: number
-     | identifier
-
-// === 基本類型 ===
-
-// 音符字面值 - 支援有引號和無引號
-note_literal: NOTE_STRING | NOTE_BARE
-
-// 和弦字面值
-chord_literal: "[" note_list "]"
-
-// 音符列表
-note_list: note_literal ("," note_literal)*
-
-// 其他基本類型
-duration: number
-identifier: IDENTIFIER
-ref_identifier: REF_IDENTIFIER
-number: NUMBER
+# 安裝相依套件
+pip install -r requirements.txt
 ```
 
-## 3. 完整 AST 節點類型
-
-### 程式結構節點
-
-#### 程式根節點
-```json
-{
-    "type": "program",
-    "body": [/* 語句列表 */]
-}
+#### requirements.txt 內容
+```txt
+lark-parser>=0.12.0
+pygame>=2.1.0
+numpy>=1.21.0
 ```
 
-### 音樂語句節點
+### 2. 基本執行方式
 
-#### 音符語句
-```json
-// 單個音符
-{
-    "type": "note",
-    "note_value": {"type": "note_literal", "value": "C4"},
-    "duration": {"type": "number", "value": 1.0}
-}
+#### 方式一：執行 .ml 檔案
+```bash
+# 進入音樂語言目錄
+cd music_lang
 
-// 音符陣列
-{
-    "type": "note",
-    "note_value": {
-        "type": "note_array",
-        "notes": [
-            {"type": "note_literal", "value": "C4"},
-            {"type": "note_literal", "value": "D4"},
-            {"type": "note_literal", "value": "E4"}
-        ]
-    },
-    "duration": {"type": "number", "value": 0.5}
-}
+# 執行音樂程式檔案
+python main.py examples/twinkle_star.ml
 ```
 
-#### 和弦語句
-```json
-{
-    "type": "chord",
-    "chord": {
-        "type": "chord_literal",
-        "notes": [
-            {"type": "note_literal", "value": "C4"},
-            {"type": "note_literal", "value": "E4"},
-            {"type": "note_literal", "value": "G4"}
-        ]
-    },
-    "duration": {"type": "number", "value": 2.0}
-}
+#### 方式二：直接執行程式碼
+```bash
+# 執行字串形式的程式碼
+python main.py --code "tempo 120; note C4, 1.0; chord [C4, E4, G4], 2.0"
 ```
 
-#### 速度/音量設定
-```json
-{
-    "type": "tempo",
-    "bpm": {"type": "number", "value": 120}
-}
-
-{
-    "type": "volume",
-    "volume": {"type": "number", "value": 0.8}
-}
+#### 方式三：互動模式
+```bash
+# 進入互動模式
+python main.py --interactive
 ```
 
-### 控制流語句節點
+## 🎵 執行範例
 
-#### 固定次數迴圈
-```json
-{
-    "type": "loop",
-    "count": {"type": "number", "value": 3},
-    "body": [/* 迴圈內的語句 */]
-}
+### 範例 1：執行小星星變奏曲
+```bash
+cd music_lang
+python main.py examples/twinkle_star.ml
 ```
 
-#### 條件迴圈
-```json
-{
-    "type": "while",
-    "condition": {
-        "type": "comparison",
-        "op": "<",
-        "left": {"type": "identifier", "name": "counter"},
-        "right": {"type": "number", "value": 10}
-    },
-    "body": [/* 迴圈體語句 */]
-}
+**預期輸出：**
+```
+🔍 解析程式碼...
+✅ 解析成功！
+🎵 開始播放音樂...
+♪ 播放音符: C4, 時長: 0.5s
+♪ 播放音符: C4, 時長: 0.5s
+♪ 播放音符: G4, 時長: 0.5s
+...
+🎵 音樂播放完成！
 ```
 
-#### 範圍迴圈
-```json
-{
-    "type": "for",
-    "variable": {"type": "identifier", "name": "i"},
-    "range": {
-        "type": "range",
-        "start": {"type": "number", "value": 0},
-        "end": {"type": "number", "value": 10}
-    },
-    "body": [/* 迴圈體語句 */]
-}
-```
-
-#### 條件判斷
-```json
-{
-    "type": "if",
-    "condition": {
-        "type": "comparison",
-        "op": "==",
-        "left": {"type": "identifier", "name": "mode"},
-        "right": {"type": "number", "value": 1}
-    },
-    "then_body": [/* if 分支語句 */],
-    "elseif_clauses": [
-        {
-            "type": "elseif_clause",
-            "condition": {/* 條件 */},
-            "body": [/* elseif 分支語句 */]
-        }
-    ],
-    "else_body": [/* else 分支語句 */]
-}
-```
-
-### 函式語句節點
-
-#### 函式定義
-```json
-{
-    "type": "function_def",
-    "name": {"type": "identifier", "name": "melody"},
-    "params": [
-        {"type": "identifier", "name": "note"},
-        {"type": "identifier", "name": "duration"}
-    ],
-    "body": [/* 函式體語句 */]
-}
-```
-
-#### 函式呼叫
-```json
-// 使用者定義函式呼叫
-{
-    "type": "function_call",
-    "name": {"type": "identifier", "name": "melody"},
-    "args": [
-        {"type": "note_literal", "value": "C4"},
-        {"type": "number", "value": 1.0}
-    ]
-}
-
-// ref 函式呼叫
-{
-    "type": "ref_call",
-    "name": {"type": "ref_identifier", "name": "refVolume"},
-    "args": [{"type": "number", "value": 0.8}]
-}
-```
-
-#### 賦值語句
-```json
-{
-    "type": "assign",
-    "var": {"type": "identifier", "name": "tempo_value"},
-    "value": {"type": "number", "value": 120}
-}
-```
-
-### 表達式節點
-
-#### 基本值
-```json
-// 數值
-{
-    "type": "number",
-    "value": 120
-}
-
-// 標識符
-{
-    "type": "identifier",
-    "name": "tempo_value"
-}
-
-// 音符字面值
-{
-    "type": "note_literal",
-    "value": "C4"
-}
-```
-
-#### 運算表達式
-```json
-// 算術運算
-{
-    "type": "binop",
-    "op": "+",
-    "left": {"type": "identifier", "name": "base_tempo"},
-    "right": {"type": "number", "value": 20}
-}
-
-// 比較運算
-{
-    "type": "comparison",
-    "op": ">=",
-    "left": {"type": "identifier", "name": "volume"},
-    "right": {"type": "number", "value": 0.5}
-}
-
-// 邏輯運算
-{
-    "type": "logical_op",
-    "op": "and",
-    "left": {
-        "type": "comparison",
-        "op": ">",
-        "left": {"type": "identifier", "name": "tempo"},
-        "right": {"type": "number", "value": 100}
-    },
-    "right": {
-        "type": "comparison",
-        "op": "<",
-        "left": {"type": "identifier", "name": "volume"},
-        "right": {"type": "number", "value": 0.8}
-    }
-}
-
-// 一元運算
-{
-    "type": "unary_op",
-    "op": "not",
-    "operand": {
-        "type": "comparison",
-        "op": "==",
-        "left": {"type": "identifier", "name": "playing"},
-        "right": {"type": "number", "value": 0}
-    }
-}
-```
-
-## 4. 語法使用範例
-
-### 基本音樂語句
-
-```musiclang
-// 設定速度和音量
+### 範例 2：使用 for 迴圈
+```bash
+python main.py --code "
 tempo 120
-volume 0.8
-
-// 單個音符 (兩種寫法)
-note "C4", 1.0
-note C4, 1.0
-
-// 音符陣列
-note [C4, D4, E4, F4], 0.5
-
-// 和弦
-chord [C4, E4, G4], 2.0
-chord ["C4", "E4", "G4"], 2.0
-```
-
-### 控制流語句
-
-```musiclang
-// 固定次數迴圈
-loop 4 {
+for (i, 0:5) {
     note C4, 0.5
     note G4, 0.5
 }
+"
+```
 
-// 條件迴圈
-counter = 0
-while (counter < 5) {
-    note C4, 0.5
-    counter = counter + 1
-}
-
-// 範圍迴圈
-for (i, 0:8) {
-    if (i < 4) {
-        note C4, 0.5
-    } else {
-        note G4, 0.5
-    }
-}
-
-// 條件判斷
+### 範例 3：邏輯控制演奏
+```bash
+python main.py --code "
+tempo 100
 mode = 1
 if (mode == 1) {
-    note C4, 1.0
-} elseif (mode == 2) {
-    chord [C4, E4, G4], 1.0
+    note [C4, E4, G4], 0.5
 } else {
-    note [C4, D4, E4], 0.5
+    chord [C4, E4, G4], 1.0
 }
+"
 ```
 
-### 函式定義與呼叫
+## ⚙️ main.py 程式架構
 
+### 主執行檔結構
+```python
+#!/usr/bin/env python3
+"""
+main.py - PyTune 音樂程式語言主執行檔
+"""
+
+import sys
+import argparse
+from parser.parser import MusicLanguageParser
+from audio.interpreter import MusicInterpreter
+from audio.audio_engine import AudioEngine
+
+def play_music_file(filename):
+    """播放音樂檔案"""
+    try:
+        # 1. 讀取檔案
+        with open(filename, 'r', encoding='utf-8') as f:
+            code = f.read()
+        
+        # 2. 解析程式碼
+        print("🔍 解析程式碼...")
+        parser = MusicLanguageParser()
+        ast = parser.parse(code)
+        print("✅ 解析成功！")
+        
+        # 3. 執行音樂程式
+        print("🎵 開始播放音樂...")
+        audio_engine = AudioEngine()
+        interpreter = MusicInterpreter(audio_engine)
+        interpreter.execute(ast)
+        print("🎵 音樂播放完成！")
+        
+    except FileNotFoundError:
+        print(f"❌ 找不到檔案: {filename}")
+    except SyntaxError as e:
+        print(f"❌ 語法錯誤: {e}")
+    except Exception as e:
+        print(f"❌ 執行錯誤: {e}")
+
+def play_music_code(code):
+    """播放程式碼字串"""
+    try:
+        # 解析並執行
+        print("🔍 解析程式碼...")
+        parser = MusicLanguageParser()
+        ast = parser.parse(code)
+        print("✅ 解析成功！")
+        
+        print("🎵 開始播放音樂...")
+        audio_engine = AudioEngine()
+        interpreter = MusicInterpreter(audio_engine)
+        interpreter.execute(ast)
+        print("🎵 音樂播放完成！")
+        
+    except SyntaxError as e:
+        print(f"❌ 語法錯誤: {e}")
+    except Exception as e:
+        print(f"❌ 執行錯誤: {e}")
+
+def interactive_mode():
+    """互動模式"""
+    print("🎹 PyTune 互動模式")
+    print("輸入 'exit' 或 'quit' 離開")
+    print("輸入 'help' 查看說明")
+    
+    audio_engine = AudioEngine()
+    parser = MusicLanguageParser()
+    interpreter = MusicInterpreter(audio_engine)
+    
+    while True:
+        try:
+            code = input(">>> ")
+            
+            if code.lower() in ['exit', 'quit']:
+                break
+            elif code.lower() == 'help':
+                show_help()
+                continue
+            elif code.strip() == '':
+                continue
+            
+            ast = parser.parse(code)
+            interpreter.execute(ast)
+            
+        except KeyboardInterrupt:
+            print("\n👋 再見！")
+            break
+        except Exception as e:
+            print(f"❌ 錯誤: {e}")
+
+def show_help():
+    """顯示說明"""
+    help_text = """
+🎵 PyTune 音樂程式語言說明
+
+基本語法：
+  note C4, 1.0              # 播放音符
+  note [C4, D4, E4], 0.5    # 播放音符陣列
+  chord [C4, E4, G4], 2.0   # 播放和弦
+  tempo 120                 # 設定速度
+  volume 0.8                # 設定音量
+
+控制流：
+  for (i, 0:5) { ... }      # for 迴圈
+  while (condition) { ... } # while 迴圈
+  if (condition) { ... }    # 條件判斷
+
+函式：
+  fn melody() { ... }       # 定義函式
+  melody()                  # 呼叫函式
+  refVolume(0.8)           # ref 函式
+
+範例：
+  tempo 120; note [C4, E4, G4], 0.5; chord [C4, E4, G4], 1.0
+"""
+    print(help_text)
+
+def main():
+    """主函式"""
+    parser = argparse.ArgumentParser(
+        description="PyTune - 音樂程式語言執行器",
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    
+    parser.add_argument(
+        'file', 
+        nargs='?', 
+        help='要執行的 .ml 音樂程式檔案'
+    )
+    
+    parser.add_argument(
+        '--code', '-c',
+        help='直接執行程式碼字串'
+    )
+    
+    parser.add_argument(
+        '--interactive', '-i',
+        action='store_true',
+        help='進入互動模式'
+    )
+    
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='顯示詳細執行資訊'
+    )
+    
+    args = parser.parse_args()
+    
+    # 設定詳細模式
+    if args.verbose:
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
+    
+    # 執行模式判斷
+    if args.interactive:
+        interactive_mode()
+    elif args.code:
+        play_music_code(args.code)
+    elif args.file:
+        play_music_file(args.file)
+    else:
+        print("❌ 請指定要執行的檔案或使用 --help 查看說明")
+        parser.print_help()
+
+if __name__ == "__main__":
+    main()
+```
+
+## 🎼 程式碼範例檔案
+
+### twinkle_star.ml
 ```musiclang
-// 函式定義
-fn playScale(start_note, duration) {
-    note [C4, D4, E4, F4, G4], duration
+// 小星星變奏曲
+tempo 100
+volume 0.8
+
+fn mainTheme() {
+    note [C4, C4, G4, G4, A4, A4], 0.5
+    note G4, 1.0
+    note [F4, F4, E4, E4, D4, D4], 0.5
+    note C4, 1.0
 }
 
-fn conditionalPlay(mode) {
-    if (mode == 1) {
-        note C4, 0.5
+mainTheme()
+```
+
+### for_loop_demo.ml
+```musiclang
+// for 迴圈範例
+tempo 120
+volume 0.7
+
+for (octave, 3:6) {
+    if (octave == 3) {
+        note [C3, D3, E3], 0.5
+    } elseif (octave == 4) {
+        note [C4, D4, E4], 0.5
     } else {
-        chord [C4, E4, G4], 0.5
+        note [C5, D5, E5], 0.5
     }
 }
-
-// 函式呼叫
-playScale(C4, 0.5)
-conditionalPlay(2)
-
-// ref 函式呼叫
-refVolume(0.8)
-refTempo(140)
 ```
 
-### 複雜表達式
-
+### logic_demo.ml
 ```musiclang
-// 算術表達式
-base_tempo = 100
-fast_tempo = base_tempo + 40
-slow_tempo = base_tempo - 20
+// 邏輯控制範例
+tempo 100
+mode = 1
 
-// 條件表達式
-volume_level = 8
-if (volume_level > 5 and volume_level <= 10) {
-    refVolume(0.8)
-}
-
-if (fast_tempo >= 120 or slow_tempo <= 80) {
-    // 調整演奏方式
-}
-
-// 複雜條件
-mode = 2
-style = 1
-if (not (mode == 1) and style > 0) {
-    // 複雜邏輯
+if (mode == 1) {
+    // 單音模式
+    note [C4, D4, E4, F4], 0.5
+} elseif (mode == 2) {
+    // 和弦模式
+    chord [C4, E4, G4], 1.0
+    chord [F4, A4, C5], 1.0
+} else {
+    // 混合模式
+    note C4, 0.5
+    chord [C4, E4, G4], 0.5
 }
 ```
 
-## 5. 特殊功能
+## 🔧 命令列參數
 
-### ref 函式系統
-```musiclang
-refVolume(0.8)      // 設定音量為 0.8
-refTempo(120)       // 設定速度為 120 BPM
+### 基本用法
+```bash
+python main.py [OPTIONS] [FILE]
 ```
 
-### 音符表示法支援
-```musiclang
-// 基本音符
-note C4, 0.5    // Do
-note D4, 0.5    // Re
-note E4, 0.5    // Mi
+### 參數說明
+| 參數 | 說明 | 範例 |
+|------|------|------|
+| `FILE` | 要執行的 .ml 檔案 | `python main.py song.ml` |
+| `--code`, `-c` | 直接執行程式碼 | `python main.py -c "note C4, 1.0"` |
+| `--interactive`, `-i` | 互動模式 | `python main.py -i` |
+| `--verbose`, `-v` | 顯示詳細資訊 | `python main.py -v song.ml` |
+| `--help`, `-h` | 顯示說明 | `python main.py -h` |
 
-// 升音
-note C#4, 0.5   // 升 Do
-note F#4, 0.5   // 升 Fa
+## 🐛 除錯與錯誤處理
 
-// 降音  
-note Db4, 0.5   // 降 Re
-note Bb3, 0.5   // 降 Si
+### 常見錯誤與解決方法
 
-// 不同八度
-note C3, 0.5    // 低八度
-note C5, 0.5    // 高八度
+#### 1. 語法錯誤
+```bash
+❌ 語法錯誤: Unexpected token 'C44'
+```
+**解決方法：** 檢查音符格式，應為 `C4` 而非 `C44`
+
+#### 2. 檔案不存在
+```bash
+❌ 找不到檔案: song.ml
+```
+**解決方法：** 確認檔案路徑正確
+
+#### 3. 模組匯入錯誤
+```bash
+❌ ModuleNotFoundError: No module named 'lark'
+```
+**解決方法：** 安裝相依套件 `pip install lark-parser`
+
+### 除錯模式
+```bash
+# 使用 verbose 模式查看詳細執行過程
+python main.py --verbose examples/twinkle_star.ml
 ```
 
-### 變數與運算
-```musiclang
-// 變數賦值
-tempo_value = 120
-volume_level = 8
-octave = 4
+## 🎯 效能調優
 
-// 算術運算
-new_tempo = tempo_value * 2
-half_volume = volume_level / 2
-next_octave = octave + 1
-
-// 在音樂語句中使用變數
-refTempo(new_tempo)
-refVolume(half_volume)
+### 音訊設定
+在 `audio_engine.py` 中可以調整：
+```python
+# 音訊品質設定
+SAMPLE_RATE = 44100    # 取樣率
+BUFFER_SIZE = 1024     # 緩衝區大小
+CHANNELS = 2           # 聲道數
 ```
 
-## 6. 運算符優先級
-
-1. `()` - 括號
-2. `not` - 邏輯非
-3. `*`, `/` - 乘法、除法
-4. `+`, `-` - 加法、減法
-5. `<`, `>`, `<=`, `>=` - 比較運算
-6. `==`, `!=` - 等於、不等於
-7. `and` - 邏輯且
-8. `or` - 邏輯或
-9. `=` - 賦值
-
-## 7. 註解支援
-
-```musiclang
-// 這是單行註解
-tempo 120  // 設定速度為 120 BPM
-
-// 演奏主旋律
-note [C4, D4, E4], 0.5
+### 記憶體使用
+```python
+# 大型音樂檔案建議分段執行
+python main.py --code "
+tempo 120
+for (section, 0:10) {
+    // 分段演奏，避免記憶體過載
+}
+"
 ```
-#
+
+## 📝 開發模式
+
+### 建立新的音樂程式
+1. 建立 `.ml` 檔案
+2. 編寫音樂程式碼
+3. 執行測試：`python main.py your_song.ml`
+
+### 除錯流程
+1. 檢查語法：使用 `--verbose` 模式
+2. 分段測試：逐步執行程式碼片段
+3. 檢查音訊輸出：確認音符播放正確
+
+這份執行指南涵蓋了 PyTune 的完整使用方式，從基本執行到進階除錯都有詳細說明！
