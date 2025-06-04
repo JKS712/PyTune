@@ -1,0 +1,54 @@
+// 簡單音色演示 - simple_demo.ptm
+// 路徑: D:\parser\pyTune\music_lang\examples\simple_demo.ptm
+
+tempo 120
+volume 0.8
+
+// 鋼琴演奏
+instrument piano
+note [C4, D4, E4, F4], 0.5
+chord [C4, E4, G4], 1.0
+
+// 小提琴演奏  
+instrument violin
+note C5, 1.0
+note D5, 1.0
+
+// 吉他演奏
+instrument guitar
+chord [C3, E3, G3], 1.0
+chord [F3, A3, C4], 1.0
+
+// 鼓聲
+instrument drums
+note C2, 0.5
+note D3, 0.5
+note C2, 0.5
+note D3, 0.5
+
+// 長笛
+instrument flute
+note [C5, D5, E5], 0.6
+
+// 小號
+instrument trumpet
+note [C4, E4, G4], 0.8
+
+// 測試 ref 函式
+refInstrument("piano")
+refVolume(0.9)
+note [C4, E4, G4], 0.5
+
+// 測試控制流
+for (i, 0:3) {
+    if (i == 0) {
+        instrument organ
+        chord [C3, E3, G3], 1.0
+    } elseif (i == 1) {
+        instrument saxophone  
+        note C4, 0.8
+    } else {
+        instrument synth
+        chord [C4, E4, G4, C5], 1.2
+    }
+}
