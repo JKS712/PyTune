@@ -1,4 +1,5 @@
-// music_lang.lark - 簡化音符語法版本
+// music_lang.lark - 完整的音樂程式語言語法定義
+// 支援多樂器、控制流、函式等完整功能
 
 ?start: statement*
 
@@ -6,6 +7,7 @@
           | chord_stmt  
           | tempo_stmt
           | volume_stmt
+          | instrument_stmt
           | loop_stmt
           | fn_stmt
           | fn_call_stmt
@@ -14,6 +16,8 @@
           | for_stmt
           | assignment
           | expression ";"
+
+// === 音樂語句 ===
 
 // 音符語句 - 支援單個音符和音符陣列
 note_stmt: "note" note_value ("," duration)?
@@ -34,29 +38,36 @@ tempo_stmt: "tempo" number
 // 音量設定
 volume_stmt: "volume" number
 
-// 迴圈語句
+// 樂器設定
+instrument_stmt: "refinst" "=" IDENTIFIER
+
+// === 控制流語句 ===
+
+// 固定次數迴圈語句
 loop_stmt: "loop" number "{" statement* "}"
 
-// if 條件語句
+// 條件迴圈語句
+while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
+
+// 範圍迴圈語句
+for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
+
+// 範圍表達式
+range_expr: number ":" number
+
+// 條件判斷語句
 if_stmt: "if" "(" logical_expr ")" "{" statement* "}" elseif_clause* else_clause?
 
 elseif_clause: "elseif" "(" logical_expr ")" "{" statement* "}"
 
 else_clause: "else" "{" statement* "}"
 
-// while 迴圈語句
-while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
-
-// for 迴圈語句
-for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
-
-// 範圍表達式
-range_expr: number ":" number
+// === 函式語句 ===
 
 // 函數定義
 fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
 
-// 函數調用語句 - 修改優先級，讓 ref 函數優先匹配
+// 函數調用語句 - ref 函數優先匹配
 fn_call_stmt: ref_identifier "(" argument_list? ")"
             | identifier "(" argument_list? ")"
 
@@ -68,6 +79,8 @@ argument_list: expression ("," expression)*
 
 // 賦值語句
 assignment: identifier "=" expression
+
+// === 表達式系統 ===
 
 // 表達式
 ?expression: logical_expr
@@ -110,21 +123,33 @@ assignment: identifier "=" expression
 ?atom: number
      | identifier
 
-// 基本類型
+// === 基本類型 ===
+
+// 音符字面值 - 支援無引號音符
 note_literal: SIMPLE_NOTE
+
+// 和弦字面值
 chord_literal: "[" note_list "]"
+
+// 音符列表
 note_list: note_literal ("," note_literal)*
+
+// 其他基本類型
 duration: number
 identifier: IDENTIFIER
 ref_identifier: REF_IDENTIFIER
+number: NUMBER
 
-// Token 定義 - 簡化版本
+// === Token 定義 ===
+
+// 音符 Token - 支援升降號和八度
 SIMPLE_NOTE: /[A-Ga-g][#b]?[0-9]/
 
+// 標識符 Token
 IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
 REF_IDENTIFIER: /ref[A-Z][a-zA-Z0-9_]*/
 
-number: NUMBER
+// 數字 Token
 NUMBER: /[0-9]+(\.[0-9]+)?/
 
 // 註解和空白字符

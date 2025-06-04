@@ -1,0 +1,200 @@
+// 多樂器卡農 - Four Voices Canon
+// 帕海貝爾風格的現代改編
+
+tempo 72
+volume 0.8
+
+// === 定義主題旋律 ===
+fn canonTheme() {
+    // 第一句 - 上行旋律
+    note [D4, A4, B4, F#4], 1.0
+    note [G4, D4, G4, A4], 1.0
+    
+    // 第二句 - 發展變化
+    note [B4, C#5, D5, C#5], 1.0
+    note [B4, A4, G4, F#4], 1.0
+    
+    // 第三句 - 高潮
+    note [G4, F#4, G4, A4], 1.0
+    note [D5, C#5, B4, A4], 1.0
+    
+    // 第四句 - 回歸
+    note [B4, G4, A4, F#4], 1.0
+    note [G4, A4, D4], 1.5
+    note D4, 0.5
+}
+
+// === 定義變奏主題 (小提琴用) ===
+fn canonThemeVariation() {
+    // 在主題基礎上添加裝飾音
+    note [D5, A5], 0.5
+    note [B5, F#5], 0.5
+    note [G5, D5], 0.5
+    note [G5, A5], 0.5
+    
+    note [B5, C#6, D6], 0.75
+    note [C#6, B5, A5], 0.75
+    note [G5, F#5], 0.5
+    
+    note [G5, F#5, G5], 0.75
+    note [A5, D6, C#6], 0.75
+    note [B5, A5], 0.5
+    
+    note [B5, G5, A5], 0.75
+    note [F#5, G5, A5], 0.75
+    note [D5, A5, D5], 1.0
+}
+
+// === 低音聲部 ===
+fn bassLine() {
+    // 經典的低音進行
+    note [D3, A3, B3, F#3], 2.0
+    note [G3, D3, G3, A3], 2.0
+    note [B3, F#3, G3, D3], 2.0
+    note [G3, A3, D3, D3], 2.0
+    
+    // 重複變化
+    note [D3, A3, B3, F#3], 2.0
+    note [G3, D3, G3, A3], 2.0
+    note [B3, A3, G3, F#3], 2.0
+    note [G3, A3, D3], 3.0
+    note D3, 1.0
+}
+
+// === 和聲填充 (長笛) ===
+fn harmonyLine() {
+    // 等待主題建立
+    note [F#5, G5, A5, B5], 1.0
+    note [A5, F#5, B5, C#6], 1.0
+    note [D6, A5, B5, A5], 1.0
+    note [G5, A5, F#5, D5], 1.0
+    
+    note [G5, A5, B5, A5], 1.0
+    note [F#5, G5, A5, B5], 1.0
+    note [C#6, D6, B5, A5], 1.0
+    note [B5, A5, F#5], 1.5
+    note A5, 0.5
+}
+
+// === 第一聲部：鋼琴 - 主導聲部 ===
+refinst = piano
+refVolume(0.7)
+refTempo(72)
+
+// 開始主題
+canonTheme()
+
+// 簡短間奏
+note [A4, B4, C#5, D5], 1.0
+
+// === 第二聲部：小提琴 - 2小節後進入 ===
+refinst = violin
+refVolume(0.6)
+
+// 等待鋼琴建立主題 (8拍)
+note [D5, A5], 4.0
+note [B5, A5], 4.0
+
+// 小提琴演奏變奏主題
+canonThemeVariation()
+
+// === 第三聲部：大提琴 - 低音支撐 ===
+refinst = cello
+refVolume(0.8)
+refTempo(72)
+
+// 從頭開始提供低音支撐
+bassLine()
+
+// === 第四聲部：長笛 - 4小節後進入 ===
+refinst = flute
+refVolume(0.5)
+
+// 等待其他聲部建立 (16拍)
+note [A5, B5], 8.0
+note [C#6, D6], 8.0
+
+// 長笛添加和聲
+harmonyLine()
+
+// === 集體合奏段落 ===
+
+// 鋼琴重現主題
+refinst = piano
+refVolume(0.6)
+canonTheme()
+
+// 同時，其他樂器提供伴奏
+refinst = violin
+refVolume(0.5)
+// 小提琴高音伴奏
+note [A5, B5, C#6, D6], 2.0
+note [B5, A5, G5, F#5], 2.0
+note [G5, A5, B5, C#6], 2.0
+note [D6, A5, F#5], 2.0
+note [G5, F#5, D5], 2.0
+
+// 大提琴持續低音
+refinst = cello
+refVolume(0.7)
+note [D3, A3], 4.0
+note [B3, F#3], 4.0
+note [G3, D3], 4.0
+note [A3, D3], 4.0
+
+// === 尾聲：所有樂器匯聚 ===
+
+// 漸強的最終和弦
+refinst = piano
+refVolume(0.8)
+chord [D4, F#4, A4, D5], 2.0
+
+refinst = violin
+refVolume(0.7)
+chord [A5, D6, F#6], 2.0
+
+refinst = cello
+refVolume(0.8)
+chord [D3, A3, D4], 2.0
+
+refinst = flute
+refVolume(0.6)
+chord [F#5, A5, D6], 2.0
+
+// 最終齊奏
+refinst = piano
+refVolume(0.9)
+chord [D4, F#4, A4, D5], 4.0
+
+// === 裝飾性結尾 ===
+
+// 長笛獨奏片段
+refinst = flute
+refVolume(0.7)
+refTempo(60)
+note [D6, C#6, B5, A5], 1.0
+note [G5, F#5, E5, D5], 1.0
+note [A5, F#5, D5], 2.0
+
+// 所有樂器最終和弦
+refinst = piano
+refVolume(0.8)
+refTempo(72)
+chord [D4, A4, D5], 1.0
+
+refinst = violin
+refVolume(0.6)
+chord [F#5, A5, D6], 1.0
+
+refinst = cello
+refVolume(0.7)
+chord [D3, A3], 1.0
+
+refinst = flute
+refVolume(0.5)
+chord [A5, D6], 1.0
+
+// 終止式
+refinst = piano
+refVolume(0.9)
+chord [D4, F#4, A4, D5], 6.0

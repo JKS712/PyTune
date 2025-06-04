@@ -1,19 +1,158 @@
 #!/usr/bin/env python3
 """
-parser.py - 完整的音樂程式語言解析器
-支援多樂器、控制流、函式等完整功能
+instrument_parser_fix.py - 修正樂器支援的解析器
+這個檔案可以直接替換或整合到現有的 parser.py 中
 """
 
-import os
-from lark import Lark, Transformer, Tree, Token
+# 修正的語法定義
+INSTRUMENT_GRAMMAR = '''
+// music_lang.lark - 支援樂器的完整語法
 
-class MusicTransformer(Transformer):
-    """將解析樹轉換為 AST"""
+?start: statement*
+
+?statement: note_stmt
+          | chord_stmt  
+          | tempo_stmt
+          | volume_stmt
+          | instrument_stmt
+          | loop_stmt
+          | fn_stmt
+          | fn_call_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | assignment
+          | expression ";"
+
+// 音符語句 - 支援單個音符和音符陣列
+note_stmt: "note" note_value ("," duration)?
+
+// 音符值可以是單個音符或音符陣列
+note_value: note_literal
+          | note_array
+
+// 音符陣列
+note_array: "[" note_list "]"
+
+// 和弦語句  
+chord_stmt: "chord" chord_literal ("," duration)?
+
+// 速度設定
+tempo_stmt: "tempo" number
+
+// 音量設定
+volume_stmt: "volume" number
+
+// 樂器設定 - 修正語法
+instrument_stmt: "refinst" "=" IDENTIFIER
+
+// 固定次數迴圈語句
+loop_stmt: "loop" number "{" statement* "}"
+
+// 條件迴圈語句
+while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
+
+// 範圍迴圈語句
+for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
+
+// 範圍表達式
+range_expr: number ":" number
+
+// 條件判斷語句
+if_stmt: "if" "(" logical_expr ")" "{" statement* "}" elseif_clause* else_clause?
+
+elseif_clause: "elseif" "(" logical_expr ")" "{" statement* "}"
+
+else_clause: "else" "{" statement* "}"
+
+// 函數定義
+fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
+
+// 函數調用語句 - ref 函數優先匹配
+fn_call_stmt: ref_identifier "(" argument_list? ")"
+            | identifier "(" argument_list? ")"
+
+// 參數列表
+parameter_list: identifier ("," identifier)*
+
+// 參數列表
+argument_list: expression ("," expression)*
+
+// 賦值語句
+assignment: identifier "=" expression
+
+// 表達式
+?expression: logical_expr
+           | note_literal
+           | chord_literal
+
+// 邏輯表達式
+?logical_expr: logical_or
+
+?logical_or: logical_or "or" logical_and   -> or_expr
+           | logical_and
+
+?logical_and: logical_and "and" comparison -> and_expr
+            | comparison
+
+?comparison: arithmetic_expr "==" arithmetic_expr  -> eq
+           | arithmetic_expr "!=" arithmetic_expr  -> neq
+           | arithmetic_expr "<" arithmetic_expr   -> lt
+           | arithmetic_expr ">" arithmetic_expr   -> gt
+           | arithmetic_expr "<=" arithmetic_expr  -> lte
+           | arithmetic_expr ">=" arithmetic_expr  -> gte
+           | "not" logical_primary                 -> not_expr
+           | logical_primary
+
+?logical_primary: "(" logical_expr ")"
+                | arithmetic_expr
+
+// 算術表達式
+?arithmetic_expr: arithmetic_expr "+" term   -> add
+                | arithmetic_expr "-" term   -> sub
+                | term
+
+?term: term "*" factor -> mul
+     | term "/" factor -> div
+     | factor
+
+?factor: "(" arithmetic_expr ")"
+       | atom
+
+?atom: number
+     | identifier
+
+// 基本類型
+note_literal: SIMPLE_NOTE
+chord_literal: "[" note_list "]"
+note_list: note_literal ("," note_literal)*
+duration: number
+identifier: IDENTIFIER
+ref_identifier: REF_IDENTIFIER
+
+// Token 定義
+SIMPLE_NOTE: /[A-Ga-g][#b]?[0-9]/
+
+IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
+REF_IDENTIFIER: /ref[A-Z][a-zA-Z0-9_]*/
+
+number: NUMBER
+NUMBER: /[0-9]+(\\.[0-9]+)?/
+
+// 註解和空白字符
+COMMENT: "//" /[^\\n]*/
+%ignore COMMENT
+%ignore /\\s+/
+'''
+
+# 修正的 Transformer 類別
+from lark import Transformer
+
+class FixedMusicTransformer(Transformer):
+    """修正樂器支援的音樂轉換器"""
     
     def start(self, items):
         return {"type": "program", "body": list(items)}
-    
-    # === 音樂語句處理 ===
     
     def note_stmt(self, items):
         note_value = items[0]
@@ -38,7 +177,7 @@ class MusicTransformer(Transformer):
         return {"type": "volume", "volume": items[0]}
     
     def instrument_stmt(self, items):
-        # items[0] 是樂器名稱 (IDENTIFIER)
+        # 直接從 IDENTIFIER token 獲取樂器名稱
         instrument_name = str(items[0])
         return {
             "type": "instrument", 
@@ -47,8 +186,6 @@ class MusicTransformer(Transformer):
                 "name": instrument_name
             }
         }
-    
-    # === 控制流語句處理 ===
     
     def loop_stmt(self, items):
         count = items[0]
@@ -115,8 +252,6 @@ class MusicTransformer(Transformer):
     def else_clause(self, items):
         return {"type": "else_clause", "body": list(items)}
     
-    # === 函式語句處理 ===
-    
     def fn_stmt(self, items):
         name = items[0]
         params = []
@@ -165,8 +300,6 @@ class MusicTransformer(Transformer):
     def assignment(self, items):
         return {"type": "assign", "var": items[0], "value": items[1]}
     
-    # === 基本類型處理 ===
-    
     def note_literal(self, items):
         note_str = str(items[0])
         return {"type": "note_literal", "value": note_str}
@@ -199,9 +332,7 @@ class MusicTransformer(Transformer):
     def duration(self, items):
         return items[0]
     
-    # === 運算表達式處理 ===
-    
-    # 算術運算
+    # 數學運算
     def add(self, items):
         return {"type": "binop", "op": "+", "left": items[0], "right": items[1]}
     
@@ -246,200 +377,11 @@ class MusicTransformer(Transformer):
     def logical_primary(self, items):
         return items[0]
 
-
-class MusicLanguageParser:
-    """音樂程式語言解析器"""
+# 使用範例
+if __name__ == "__main__":
+    from lark import Lark
     
-    def __init__(self, grammar_file=None):
-        if grammar_file and os.path.exists(grammar_file):
-            with open(grammar_file, 'r', encoding='utf-8') as f:
-                grammar = f.read()
-        else:
-            # 內建語法定義
-            grammar = '''
-// music_lang.lark - 完整的音樂程式語言語法定義
-
-?start: statement*
-
-?statement: note_stmt
-          | chord_stmt  
-          | tempo_stmt
-          | volume_stmt
-          | instrument_stmt
-          | loop_stmt
-          | fn_stmt
-          | fn_call_stmt
-          | if_stmt
-          | while_stmt
-          | for_stmt
-          | assignment
-          | expression ";"
-
-// === 音樂語句 ===
-
-// 音符語句 - 支援單個音符和音符陣列
-note_stmt: "note" note_value ("," duration)?
-
-// 音符值可以是單個音符或音符陣列
-note_value: note_literal
-          | note_array
-
-// 音符陣列
-note_array: "[" note_list "]"
-
-// 和弦語句  
-chord_stmt: "chord" chord_literal ("," duration)?
-
-// 速度設定
-tempo_stmt: "tempo" number
-
-// 音量設定
-volume_stmt: "volume" number
-
-// 樂器設定
-instrument_stmt: "refinst" "=" IDENTIFIER
-
-// === 控制流語句 ===
-
-// 固定次數迴圈語句
-loop_stmt: "loop" number "{" statement* "}"
-
-// 條件迴圈語句
-while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
-
-// 範圍迴圈語句
-for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
-
-// 範圍表達式
-range_expr: number ":" number
-
-// 條件判斷語句
-if_stmt: "if" "(" logical_expr ")" "{" statement* "}" elseif_clause* else_clause?
-
-elseif_clause: "elseif" "(" logical_expr ")" "{" statement* "}"
-
-else_clause: "else" "{" statement* "}"
-
-// === 函式語句 ===
-
-// 函數定義
-fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
-
-// 函數調用語句 - ref 函數優先匹配
-fn_call_stmt: ref_identifier "(" argument_list? ")"
-            | identifier "(" argument_list? ")"
-
-// 參數列表
-parameter_list: identifier ("," identifier)*
-
-// 參數列表
-argument_list: expression ("," expression)*
-
-// 賦值語句
-assignment: identifier "=" expression
-
-// === 表達式系統 ===
-
-// 表達式
-?expression: logical_expr
-           | note_literal
-           | chord_literal
-
-// 邏輯表達式
-?logical_expr: logical_or
-
-?logical_or: logical_or "or" logical_and   -> or_expr
-           | logical_and
-
-?logical_and: logical_and "and" comparison -> and_expr
-            | comparison
-
-?comparison: arithmetic_expr "==" arithmetic_expr  -> eq
-           | arithmetic_expr "!=" arithmetic_expr  -> neq
-           | arithmetic_expr "<" arithmetic_expr   -> lt
-           | arithmetic_expr ">" arithmetic_expr   -> gt
-           | arithmetic_expr "<=" arithmetic_expr  -> lte
-           | arithmetic_expr ">=" arithmetic_expr  -> gte
-           | "not" logical_primary                 -> not_expr
-           | logical_primary
-
-?logical_primary: "(" logical_expr ")"
-                | arithmetic_expr
-
-// 算術表達式
-?arithmetic_expr: arithmetic_expr "+" term   -> add
-                | arithmetic_expr "-" term   -> sub
-                | term
-
-?term: term "*" factor -> mul
-     | term "/" factor -> div
-     | factor
-
-?factor: "(" arithmetic_expr ")"
-       | atom
-
-?atom: number
-     | identifier
-
-// === 基本類型 ===
-
-// 音符字面值 - 支援無引號音符
-note_literal: SIMPLE_NOTE
-
-// 和弦字面值
-chord_literal: "[" note_list "]"
-
-// 音符列表
-note_list: note_literal ("," note_literal)*
-
-// 其他基本類型
-duration: number
-identifier: IDENTIFIER
-ref_identifier: REF_IDENTIFIER
-number: NUMBER
-
-// === Token 定義 ===
-
-// 音符 Token - 支援升降號和八度
-SIMPLE_NOTE: /[A-Ga-g][#b]?[0-9]/
-
-// 標識符 Token
-IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/
-REF_IDENTIFIER: /ref[A-Z][a-zA-Z0-9_]*/
-
-// 數字 Token
-NUMBER: /[0-9]+(\\.[0-9]+)?/
-
-// 註解和空白字符
-COMMENT: "//" /[^\\n]*/
-%ignore COMMENT
-%ignore /\\s+/
-            '''
-        
-        try:
-            self.parser = Lark(
-                grammar,
-                parser='lalr',
-                transformer=MusicTransformer()
-            )
-            print("✅ 解析器初始化成功")
-        except Exception as e:
-            print(f"❌ 解析器初始化失敗: {e}")
-            raise
-    
-    def parse(self, code):
-        """解析程式碼"""
-        try:
-            result = self.parser.parse(code)
-            return result
-        except Exception as e:
-            print(f"❌ 語法錯誤: {e}")
-            raise SyntaxError(f"語法錯誤: {e}")
-
-def test_parser():
-    """測試解析器"""
-    parser = MusicLanguageParser()
-    
+    # 測試樂器語法
     test_code = '''
     tempo 120
     volume 0.8
@@ -449,26 +391,18 @@ def test_parser():
     
     refinst = violin
     note G4, 1.0
-    
-    fn melody() {
-        note [C4, E4, G4], 0.5
-    }
-    
-    melody()
-    
-    for (i, 0:3) {
-        note C4, 0.3
-    }
     '''
     
     try:
-        ast = parser.parse(test_code)
-        print("✅ 解析成功！")
-        print(f"AST: {ast}")
-        return ast
+        parser = Lark(
+            INSTRUMENT_GRAMMAR,
+            parser='lalr',
+            transformer=FixedMusicTransformer()
+        )
+        
+        result = parser.parse(test_code)
+        print("✅ 樂器語法解析成功！")
+        print(f"AST: {result}")
+        
     except Exception as e:
         print(f"❌ 解析失敗: {e}")
-        return None
-
-if __name__ == "__main__":
-    test_parser()
