@@ -1,630 +1,626 @@
-# PyTune 完整語法規則與用法
-
-## 1. Lexer (詞法分析器)
-
-### Token 定義
-
-```lark
-// 基本 Token
-NOTE_STRING: "\"" NOTE_PATTERN "\""           // 音符字符串，如 "C4", "A#3"
-NOTE_BARE: NOTE_PATTERN                       // 無引號音符，如 C4, A#3
-NOTE_PATTERN: /[A-Ga-g][#b]?[0-9]/          // 音符模式：音名 + 可選升降號 + 八度
-IDENTIFIER: /[a-zA-Z_][a-zA-Z0-9_]*/         // 標識符 (變數名、函式名)
-NUMBER: /[0-9]+(\.[0-9]+)?/                  // 數字 (整數或浮點數)
-COMMENT: "//" /[^\n]*/                       // 註解
-
-// 關鍵字 Token
-"note"      // 音符播放關鍵字
-"chord"     // 和弦播放關鍵字
-"tempo"     // 速度設定關鍵字
-"volume"    // 音量設定關鍵字
-"loop"      // 固定次數迴圈關鍵字
-"while"     // 條件迴圈關鍵字
-"for"       // 範圍迴圈關鍵字
-"if"        // 條件判斷關鍵字
-"elseif"    // 條件分支關鍵字
-"else"      // 其他分支關鍵字
-"fn"        // 函式定義關鍵字
-
-// 特殊 Token (用於內建函式)
-REF_IDENTIFIER: /ref[A-Z][a-zA-Z0-9_]*/      // ref 函式，如 refVolume, refTempo
-
-// 運算符
-"+"  "-"  "*"  "/"                           // 算術運算符
-"="                                          // 賦值運算符
-"=="  "!="  "<"  ">"  "<="  ">="            // 比較運算符
-"and"  "or"  "not"                           // 邏輯運算符
-":"                                          // 範圍運算符
-
-// 分隔符和括號
-"("  ")"  "{"  "}"  "["  "]"                // 括號
-","  ";"                                     // 分隔符
-```
-
-### Token 範例
-
-```
-輸入: note [C4, E4, G4], 1.0
-Token 序列:
-- KEYWORD("note")
-- LSQB("[")
-- NOTE_BARE("C4")
-- COMMA(",")
-- NOTE_BARE("E4") 
-- COMMA(",")
-- NOTE_BARE("G4")
-- RSQB("]")
-- COMMA(",")
-- NUMBER(1.0)
-```
-
-## 2. Parser (語法分析器)
-
-### 完整語法規則
-
-```lark
-// 程式結構
-?start: statement*                           // 程式 = 語句列表
-
-// 語句類型
-?statement: note_stmt                        // 音符語句
-          | chord_stmt                       // 和弦語句  
-          | tempo_stmt                       // 速度語句
-          | volume_stmt                      // 音量語句
-          | loop_stmt                        // 固定次數迴圈語句
-          | while_stmt                       // 條件迴圈語句
-          | for_stmt                         // 範圍迴圈語句
-          | if_stmt                          // 條件判斷語句
-          | fn_stmt                          // 函式定義
-          | fn_call_stmt                     // 函式呼叫
-          | assignment                       // 賦值語句
-          | expression ";"                   // 表達式語句
-
-// === 音樂語句 ===
-
-// 音符語句 - 支援單個音符和音符陣列
-note_stmt: "note" note_value ("," duration)?
-
-// 音符值可以是單個音符或音符陣列
-note_value: note_literal
-          | note_array
-
-// 音符陣列
-note_array: "[" note_list "]"
-
-// 和弦語句  
-chord_stmt: "chord" chord_literal ("," duration)?
-
-// 速度設定
-tempo_stmt: "tempo" number
-
-// 音量設定
-volume_stmt: "volume" number
-
-// === 控制流語句 ===
-
-// 固定次數迴圈語句
-loop_stmt: "loop" number "{" statement* "}"
-
-// 條件迴圈語句
-while_stmt: "while" "(" logical_expr ")" "{" statement* "}"
-
-// 範圍迴圈語句
-for_stmt: "for" "(" identifier "," range_expr ")" "{" statement* "}"
-
-// 範圍表達式
-range_expr: number ":" number
-
-// 條件判斷語句
-if_stmt: "if" "(" logical_expr ")" "{" statement* "}" elseif_clause* else_clause?
-
-elseif_clause: "elseif" "(" logical_expr ")" "{" statement* "}"
-
-else_clause: "else" "{" statement* "}"
-
-// === 函式語句 ===
-
-// 函數定義
-fn_stmt: "fn" identifier "(" parameter_list? ")" "{" statement* "}"
-
-// 函數調用語句 - ref 函數優先匹配
-fn_call_stmt: ref_identifier "(" argument_list? ")"
-            | identifier "(" argument_list? ")"
-
-// 參數列表
-parameter_list: identifier ("," identifier)*
-
-// 參數列表
-argument_list: expression ("," expression)*
-
-// 賦值語句
-assignment: identifier "=" expression
-
-// === 表達式系統 ===
-
-// 表達式
-?expression: logical_expr
-           | note_literal
-           | chord_literal
-
-// 邏輯表達式
-?logical_expr: logical_or
-
-?logical_or: logical_or "or" logical_and   -> or_expr
-           | logical_and
-
-?logical_and: logical_and "and" comparison -> and_expr
-            | comparison
-
-?comparison: arithmetic_expr "==" arithmetic_expr  -> eq
-           | arithmetic_expr "!=" arithmetic_expr  -> neq
-           | arithmetic_expr "<" arithmetic_expr   -> lt
-           | arithmetic_expr ">" arithmetic_expr   -> gt
-           | arithmetic_expr "<=" arithmetic_expr  -> lte
-           | arithmetic_expr ">=" arithmetic_expr  -> gte
-           | "not" logical_primary                 -> not_expr
-           | logical_primary
-
-?logical_primary: "(" logical_expr ")"
-                | arithmetic_expr
-
-// 算術表達式
-?arithmetic_expr: arithmetic_expr "+" term   -> add
-                | arithmetic_expr "-" term   -> sub
-                | term
-
-?term: term "*" factor -> mul
-     | term "/" factor -> div
-     | factor
-
-?factor: "(" arithmetic_expr ")"
-       | atom
-
-?atom: number
-     | identifier
-
-// === 基本類型 ===
-
-// 音符字面值 - 支援有引號和無引號
-note_literal: NOTE_STRING | NOTE_BARE
-
-// 和弦字面值
-chord_literal: "[" note_list "]"
-
-// 音符列表
-note_list: note_literal ("," note_literal)*
-
-// 其他基本類型
-duration: number
-identifier: IDENTIFIER
-ref_identifier: REF_IDENTIFIER
-number: NUMBER
-```
-
-## 3. 完整 AST 節點類型
-
-### 程式結構節點
-
-#### 程式根節點
-```json
-{
-    "type": "program",
-    "body": [/* 語句列表 */]
-}
-```
-
-### 音樂語句節點
-
-#### 音符語句
-```json
-// 單個音符
-{
-    "type": "note",
-    "note_value": {"type": "note_literal", "value": "C4"},
-    "duration": {"type": "number", "value": 1.0}
-}
-
-// 音符陣列
-{
-    "type": "note",
-    "note_value": {
-        "type": "note_array",
-        "notes": [
-            {"type": "note_literal", "value": "C4"},
-            {"type": "note_literal", "value": "D4"},
-            {"type": "note_literal", "value": "E4"}
-        ]
-    },
-    "duration": {"type": "number", "value": 0.5}
-}
-```
-
-#### 和弦語句
-```json
-{
-    "type": "chord",
-    "chord": {
-        "type": "chord_literal",
-        "notes": [
-            {"type": "note_literal", "value": "C4"},
-            {"type": "note_literal", "value": "E4"},
-            {"type": "note_literal", "value": "G4"}
-        ]
-    },
-    "duration": {"type": "number", "value": 2.0}
-}
-```
-
-#### 速度/音量設定
-```json
-{
-    "type": "tempo",
-    "bpm": {"type": "number", "value": 120}
-}
-
-{
-    "type": "volume",
-    "volume": {"type": "number", "value": 0.8}
-}
-```
-
-### 控制流語句節點
-
-#### 固定次數迴圈
-```json
-{
-    "type": "loop",
-    "count": {"type": "number", "value": 3},
-    "body": [/* 迴圈內的語句 */]
-}
-```
-
-#### 條件迴圈
-```json
-{
-    "type": "while",
-    "condition": {
-        "type": "comparison",
-        "op": "<",
-        "left": {"type": "identifier", "name": "counter"},
-        "right": {"type": "number", "value": 10}
-    },
-    "body": [/* 迴圈體語句 */]
-}
-```
-
-#### 範圍迴圈
-```json
-{
-    "type": "for",
-    "variable": {"type": "identifier", "name": "i"},
-    "range": {
-        "type": "range",
-        "start": {"type": "number", "value": 0},
-        "end": {"type": "number", "value": 10}
-    },
-    "body": [/* 迴圈體語句 */]
-}
-```
-
-#### 條件判斷
-```json
-{
-    "type": "if",
-    "condition": {
-        "type": "comparison",
-        "op": "==",
-        "left": {"type": "identifier", "name": "mode"},
-        "right": {"type": "number", "value": 1}
-    },
-    "then_body": [/* if 分支語句 */],
-    "elseif_clauses": [
-        {
-            "type": "elseif_clause",
-            "condition": {/* 條件 */},
-            "body": [/* elseif 分支語句 */]
-        }
-    ],
-    "else_body": [/* else 分支語句 */]
-}
-```
-
-### 函式語句節點
-
-#### 函式定義
-```json
-{
-    "type": "function_def",
-    "name": {"type": "identifier", "name": "melody"},
-    "params": [
-        {"type": "identifier", "name": "note"},
-        {"type": "identifier", "name": "duration"}
-    ],
-    "body": [/* 函式體語句 */]
-}
-```
-
-#### 函式呼叫
-```json
-// 使用者定義函式呼叫
-{
-    "type": "function_call",
-    "name": {"type": "identifier", "name": "melody"},
-    "args": [
-        {"type": "note_literal", "value": "C4"},
-        {"type": "number", "value": 1.0}
-    ]
-}
-
-// ref 函式呼叫
-{
-    "type": "ref_call",
-    "name": {"type": "ref_identifier", "name": "refVolume"},
-    "args": [{"type": "number", "value": 0.8}]
-}
-```
-
-#### 賦值語句
-```json
-{
-    "type": "assign",
-    "var": {"type": "identifier", "name": "tempo_value"},
-    "value": {"type": "number", "value": 120}
-}
-```
-
-### 表達式節點
-
-#### 基本值
-```json
-// 數值
-{
-    "type": "number",
-    "value": 120
-}
-
-// 標識符
-{
-    "type": "identifier",
-    "name": "tempo_value"
-}
-
-// 音符字面值
-{
-    "type": "note_literal",
-    "value": "C4"
-}
-```
-
-#### 運算表達式
-```json
-// 算術運算
-{
-    "type": "binop",
-    "op": "+",
-    "left": {"type": "identifier", "name": "base_tempo"},
-    "right": {"type": "number", "value": 20}
-}
-
-// 比較運算
-{
-    "type": "comparison",
-    "op": ">=",
-    "left": {"type": "identifier", "name": "volume"},
-    "right": {"type": "number", "value": 0.5}
-}
-
-// 邏輯運算
-{
-    "type": "logical_op",
-    "op": "and",
-    "left": {
-        "type": "comparison",
-        "op": ">",
-        "left": {"type": "identifier", "name": "tempo"},
-        "right": {"type": "number", "value": 100}
-    },
-    "right": {
-        "type": "comparison",
-        "op": "<",
-        "left": {"type": "identifier", "name": "volume"},
-        "right": {"type": "number", "value": 0.8}
-    }
-}
-
-// 一元運算
-{
-    "type": "unary_op",
-    "op": "not",
-    "operand": {
-        "type": "comparison",
-        "op": "==",
-        "left": {"type": "identifier", "name": "playing"},
-        "right": {"type": "number", "value": 0}
-    }
-}
-```
-
-## 4. 語法使用範例
-
-### 基本音樂語句
-
+# PyTune 音樂程式語言語法說明
+
+## 📋 目錄
+
+- [基本語法](#基本語法)
+- [音樂語句](#音樂語句)
+- [樂器支援](#樂器支援)
+- [控制流語句](#控制流語句)
+- [函式系統](#函式系統)
+- [表達式與運算](#表達式與運算)
+- [變數與賦值](#變數與賦值)
+- [註解語法](#註解語法)
+- [完整範例](#完整範例)
+- [最佳實踐](#最佳實踐)
+- [常見錯誤](#常見錯誤)
+
+## 基本語法
+
+### 檔案格式
+- 副檔名：`.ptm` (PyTune Music)
+- 編碼：UTF-8
+- 語句結尾：大部分語句不需要分號，表達式語句需要分號
+
+### 基本結構
 ```musiclang
-// 設定速度和音量
+// 設定部分
 tempo 120
 volume 0.8
+refinst = piano
 
-// 單個音符 (兩種寫法)
-note "C4", 1.0
+// 音樂內容
 note C4, 1.0
-
-// 音符陣列
-note [C4, D4, E4, F4], 0.5
-
-// 和弦
 chord [C4, E4, G4], 2.0
-chord ["C4", "E4", "G4"], 2.0
+
+// 控制流
+for (i, 0:4) {
+    note C4, 0.5
+}
 ```
 
-### 控制流語句
+## 音樂語句
 
+### 1. 速度設定
 ```musiclang
-// 固定次數迴圈
+tempo <BPM值>
+```
+**範例：**
+```musiclang
+tempo 120        // 設定為 120 BPM
+tempo 60         // 慢板
+tempo 180        // 快板
+```
+
+### 2. 音量設定
+```musiclang
+volume <音量值>
+```
+**範例：**
+```musiclang
+volume 0.8       // 80% 音量
+volume 0.5       // 50% 音量
+volume 1.0       // 最大音量
+```
+
+### 3. 音符播放
+```musiclang
+note <音符>, <時長>
+note [<音符列表>], <時長>
+```
+
+#### 音符格式
+- **音名**：C, D, E, F, G, A, B
+- **升音**：C#, D#, F#, G#, A#
+- **降音**：Db, Eb, Gb, Ab, Bb
+- **八度**：0-8 (4為中央八度)
+
+**範例：**
+```musiclang
+note C4, 1.0              // 中央C，持續1秒
+note [C4, D4, E4], 0.5    // 音符陣列，每個音符0.5秒
+note F#5, 0.25            // 高音升F，持續0.25秒
+note Bb3, 2.0             // 低音降B，持續2秒
+```
+
+### 4. 和弦播放
+```musiclang
+chord [<音符列表>], <時長>
+```
+**範例：**
+```musiclang
+chord [C4, E4, G4], 2.0        // C大調三和弦
+chord [C4, E4, G4, C5], 1.5    // C大調加八度
+chord [F3, A3, C4, F4], 3.0    // F大調四音和弦
+```
+
+## 樂器支援
+
+### 樂器切換語法
+```musiclang
+refinst = <樂器名稱>
+```
+
+### 支援的樂器列表
+
+| 樂器名稱 | 音色特點 | 適用場景 |
+|---------|---------|---------|
+| `piano` | 溫暖柔和，泛音豐富 | 主旋律、伴奏、獨奏 |
+| `violin` | 明亮有顫音，表現力強 | 抒情旋律、和聲聲部 |
+| `guitar` | 撥弦音色，自然衰減 | 節奏、分解和弦 |
+| `drums` | 打擊樂，低頻豐富 | 節拍、強調、過門 |
+| `flute` | 純淨清澈，高音明亮 | 裝飾音、快速音群 |
+| `trumpet` | 明亮有力，泛音豐富 | 主題演奏、號角效果 |
+| `saxophone` | 溫暖帶簧片質感 | 爵士風格、即興演奏 |
+| `cello` | 深沉溫暖，有顫音 | 低音旋律、和聲基礎 |
+| `bass` | 厚重低頻，節奏感強 | 低音線、節奏支撐 |
+| `organ` | 持續音，多重泛音 | 和聲墊底、教堂風格 |
+
+**範例：**
+```musiclang
+// 鋼琴主旋律
+refinst = piano
+note [C4, D4, E4, F4], 0.5
+
+// 小提琴和聲
+refinst = violin
+note [E5, F5, G5, A5], 0.5
+
+// 鼓聲節拍
+refinst = drums
+note [C2, C2, C2, C2], 0.25
+```
+
+## 控制流語句
+
+### 1. 固定次數迴圈
+```musiclang
+loop <次數> {
+    // 語句
+}
+```
+**範例：**
+```musiclang
 loop 4 {
     note C4, 0.5
     note G4, 0.5
 }
+```
 
-// 條件迴圈
+### 2. for 迴圈
+```musiclang
+for (<變數名>, <起始值>:<結束值>) {
+    // 語句
+}
+```
+**範例：**
+```musiclang
+for (i, 0:5) {
+    note C4, 0.5
+}
+
+for (octave, 3:6) {
+    if (octave == 4) {
+        note C4, 1.0
+    }
+}
+```
+
+### 3. while 迴圈
+```musiclang
+while (<條件>) {
+    // 語句
+}
+```
+**範例：**
+```musiclang
 counter = 0
-while (counter < 5) {
+while (counter < 3) {
     note C4, 0.5
     counter = counter + 1
 }
+```
 
-// 範圍迴圈
-for (i, 0:8) {
-    if (i < 4) {
-        note C4, 0.5
-    } else {
-        note G4, 0.5
-    }
+### 4. 條件判斷
+```musiclang
+if (<條件>) {
+    // 語句
+} elseif (<條件>) {
+    // 語句
+} else {
+    // 語句
 }
-
-// 條件判斷
+```
+**範例：**
+```musiclang
 mode = 1
 if (mode == 1) {
-    note C4, 1.0
+    refinst = piano
+    note [C4, E4, G4], 0.5
 } elseif (mode == 2) {
-    chord [C4, E4, G4], 1.0
+    refinst = violin
+    note [G4, B4, D5], 0.5
 } else {
-    note [C4, D4, E4], 0.5
+    refinst = guitar
+    note [E3, A3, E4], 0.5
 }
 ```
 
-### 函式定義與呼叫
+## 函式系統
 
+### 1. 函式定義
 ```musiclang
-// 函式定義
-fn playScale(start_note, duration) {
-    note [C4, D4, E4, F4, G4], duration
+fn <函式名>(<參數列表>) {
+    // 函式體
 }
-
-fn conditionalPlay(mode) {
-    if (mode == 1) {
-        note C4, 0.5
-    } else {
-        chord [C4, E4, G4], 0.5
-    }
-}
-
-// 函式呼叫
-playScale(C4, 0.5)
-conditionalPlay(2)
-
-// ref 函式呼叫
-refVolume(0.8)
-refTempo(140)
 ```
 
-### 複雜表達式
-
+### 2. 函式呼叫
 ```musiclang
-// 算術表達式
-base_tempo = 100
+<函式名>(<參數列表>)
+```
+
+**範例：**
+```musiclang
+// 定義函式
+fn playMelody(instrument, duration) {
+    refinst = instrument
+    note [C4, D4, E4, F4], duration
+}
+
+fn arpeggioChord() {
+    note C4, 0.25
+    note E4, 0.25
+    note G4, 0.25
+    note C5, 0.25
+}
+
+// 呼叫函式
+playMelody(piano, 0.5)
+arpeggioChord()
+```
+
+### 3. ref 函式（內建函式）
+```musiclang
+refVolume(<音量值>)    // 設定音量
+refTempo(<速度值>)     // 設定速度
+refInst(<樂器名>)      // 設定樂器
+```
+
+**範例：**
+```musiclang
+refVolume(0.6)         // 設定音量為 60%
+refTempo(140)          // 設定速度為 140 BPM
+refInst(violin)        // 切換到小提琴
+```
+
+## 表達式與運算
+
+### 算術運算符
+| 運算符 | 說明 | 範例 |
+|--------|------|------|
+| `+` | 加法 | `tempo + 20` |
+| `-` | 減法 | `volume - 0.1` |
+| `*` | 乘法 | `duration * 2` |
+| `/` | 除法 | `tempo / 2` |
+
+### 比較運算符
+| 運算符 | 說明 | 範例 |
+|--------|------|------|
+| `==` | 等於 | `mode == 1` |
+| `!=` | 不等於 | `counter != 0` |
+| `<` | 小於 | `volume < 0.5` |
+| `>` | 大於 | `tempo > 120` |
+| `<=` | 小於等於 | `octave <= 5` |
+| `>=` | 大於等於 | `counter >= 10` |
+
+### 邏輯運算符
+| 運算符 | 說明 | 範例 |
+|--------|------|------|
+| `and` | 邏輯且 | `volume > 0.5 and tempo < 120` |
+| `or` | 邏輯或 | `mode == 1 or mode == 2` |
+| `not` | 邏輯非 | `not (counter == 0)` |
+
+**範例：**
+```musiclang
+base_tempo = 120
 fast_tempo = base_tempo + 40
 slow_tempo = base_tempo - 20
 
-// 條件表達式
-volume_level = 8
-if (volume_level > 5 and volume_level <= 10) {
-    refVolume(0.8)
-}
-
-if (fast_tempo >= 120 or slow_tempo <= 80) {
-    // 調整演奏方式
-}
-
-// 複雜條件
-mode = 2
-style = 1
-if (not (mode == 1) and style > 0) {
-    // 複雜邏輯
+if (fast_tempo > 140 and slow_tempo < 100) {
+    refTempo(base_tempo)
 }
 ```
 
-## 5. 特殊功能
+## 變數與賦值
 
-### ref 函式系統
+### 變數命名規則
+- 以字母或底線開頭
+- 可包含字母、數字、底線
+- 區分大小寫
+
+### 賦值語法
 ```musiclang
-refVolume(0.8)      // 設定音量為 0.8
-refTempo(120)       // 設定速度為 120 BPM
+<變數名> = <表達式>
 ```
 
-### 音符表示法支援
+**範例：**
 ```musiclang
-// 基本音符
-note C4, 0.5    // Do
-note D4, 0.5    // Re
-note E4, 0.5    // Mi
-
-// 升音
-note C#4, 0.5   // 升 Do
-note F#4, 0.5   // 升 Fa
-
-// 降音  
-note Db4, 0.5   // 降 Re
-note Bb3, 0.5   // 降 Si
-
-// 不同八度
-note C3, 0.5    // 低八度
-note C5, 0.5    // 高八度
-```
-
-### 變數與運算
-```musiclang
-// 變數賦值
 tempo_value = 120
 volume_level = 8
-octave = 4
+current_octave = 4
+note_duration = 0.5
 
-// 算術運算
-new_tempo = tempo_value * 2
-half_volume = volume_level / 2
-next_octave = octave + 1
-
-// 在音樂語句中使用變數
-refTempo(new_tempo)
-refVolume(half_volume)
+// 使用變數
+refTempo(tempo_value)
+refVolume(volume_level / 10)
+note C4, note_duration
 ```
 
-## 6. 運算符優先級
+## 註解語法
 
-1. `()` - 括號
-2. `not` - 邏輯非
-3. `*`, `/` - 乘法、除法
-4. `+`, `-` - 加法、減法
-5. `<`, `>`, `<=`, `>=` - 比較運算
-6. `==`, `!=` - 等於、不等於
-7. `and` - 邏輯且
-8. `or` - 邏輯或
-9. `=` - 賦值
-
-## 7. 註解支援
-
+### 單行註解
 ```musiclang
 // 這是單行註解
-tempo 120  // 設定速度為 120 BPM
-
-// 演奏主旋律
-note [C4, D4, E4], 0.5
+tempo 120  // 行尾註解
 ```
 
-## 8. 語法錯誤處理
+**範例：**
+```musiclang
+// 設定基本參數
+tempo 120          // 中等速度
+volume 0.8         // 較響音量
 
-常見語法錯誤：
-- 缺少分號: `note C4, 0.5;` (表達式語句需要分號)
-- 括號不匹配: `if (condition { }`
-- 音符格式錯誤: `note C44, 0.5` (正確: `C4`)
-- 函式參數錯誤: `refVolume()` (缺少參數)
+// 主旋律演奏
+refinst = piano    // 使用鋼琴
+note [C4, D4, E4], 0.5  // 上行音階
+```
+
+## 完整範例
+
+### 範例 1：小星星變奏曲
+```musiclang
+// 小星星變奏曲
+tempo 100
+volume 0.8
+
+// 主題函式
+fn mainTheme() {
+    refinst = piano
+    refVolume(0.8)
+    
+    // 小星星主旋律
+    note [C4, C4, G4, G4, A4, A4], 0.5
+    note G4, 1.0
+    note [F4, F4, E4, E4, D4, D4], 0.5
+    note C4, 1.0
+}
+
+// 和聲變奏
+fn harmonyVariation() {
+    refinst = violin
+    refVolume(0.6)
+    
+    note [E5, E5, B5, B5, C6, C6], 0.5
+    note B5, 1.0
+    note [A5, A5, G5, G5, F5, F5], 0.5
+    note E5, 1.0
+}
+
+// 低音支撐
+fn bassLine() {
+    refinst = bass
+    refVolume(0.7)
+    
+    note [C3, G3, F3, C3], 1.0
+    note [F3, C3, G3, C3], 1.0
+}
+
+// 演奏結構
+mainTheme()
+harmonyVariation()
+bassLine()
+mainTheme()
+```
+
+### 範例 2：多樂器編排
+```musiclang
+// 多樂器小品
+tempo 120
+volume 0.8
+
+// 樂器展示函式
+fn instrumentShowcase() {
+    instruments = [piano, violin, guitar, flute, trumpet]
+    
+    for (i, 0:5) {
+        if (i == 0) {
+            refinst = piano
+        } elseif (i == 1) {
+            refinst = violin
+        } elseif (i == 2) {
+            refinst = guitar
+        } elseif (i == 3) {
+            refinst = flute
+        } else {
+            refinst = trumpet
+        }
+        
+        // 每種樂器演奏相同旋律
+        note [C4, E4, G4, C5], 0.4
+    }
+}
+
+// 和弦進行
+fn chordProgression() {
+    refinst = piano
+    refVolume(0.6)
+    
+    chord [C4, E4, G4], 1.0    // C大調
+    chord [F4, A4, C5], 1.0    // F大調  
+    chord [G4, B4, D5], 1.0    // G大調
+    chord [C4, E4, G4], 2.0    // 回到C大調
+}
+
+// 鼓聲節拍
+fn drumPattern() {
+    refinst = drums
+    refVolume(0.4)
+    
+    for (beat, 0:8) {
+        if (beat == 0 or beat == 4) {
+            note C2, 0.5  // 重拍
+        } else {
+            note F#2, 0.5 // 輕拍
+        }
+    }
+}
+
+// 執行演奏
+instrumentShowcase()
+chordProgression()
+drumPattern()
+```
+
+### 範例 3：動態音樂生成
+```musiclang
+// 動態音樂生成範例
+tempo 110
+volume 0.7
+
+// 動態旋律生成
+fn generateMelody(mode) {
+    refinst = piano
+    
+    if (mode == 1) {
+        // 大調模式
+        note [C4, D4, E4, F4, G4, A4, B4, C5], 0.3
+    } elseif (mode == 2) {
+        // 小調模式  
+        note [C4, D4, Eb4, F4, G4, Ab4, Bb4, C5], 0.3
+    } else {
+        // 五聲音階
+        note [C4, D4, F4, G4, A4, C5], 0.4
+    }
+}
+
+// 動態和聲
+fn generateHarmony(complexity) {
+    refinst = organ
+    refVolume(0.5)
+    
+    if (complexity == 1) {
+        // 簡單三和弦
+        chord [C4, E4, G4], 2.0
+    } elseif (complexity == 2) {
+        // 七和弦
+        chord [C4, E4, G4, B4], 2.0
+    } else {
+        // 複雜和弦
+        chord [C4, E4, G4, B4, D5, F5], 2.0
+    }
+}
+
+// 根據參數生成不同音樂
+for (style, 1:4) {
+    generateMelody(style)
+    generateHarmony(style)
+}
+```
+
+## 最佳實踐
+
+### 1. 程式碼組織
+```musiclang
+// 好的組織結構
+// ===== 設定區域 =====
+tempo 120
+volume 0.8
+
+// ===== 函式定義區域 =====
+fn melody() {
+    // 函式內容
+}
+
+// ===== 主程式區域 =====
+melody()
+```
+
+### 2. 命名慣例
+```musiclang
+// 使用有意義的名稱
+fn mainMelody() { ... }       // 好
+fn pianoIntro() { ... }       // 好
+fn m1() { ... }               // 不好
+
+// 變數命名
+base_tempo = 120              // 好
+current_volume = 0.8          // 好
+x = 120                       // 不好
+```
+
+### 3. 註解使用
+```musiclang
+// 在複雜邏輯前添加註解
+// 檢查是否為快板
+if (tempo > 140) {
+    refVolume(0.6)  // 快板時降低音量
+}
+
+// 為函式添加說明註解
+// 演奏主旋律，包含裝飾音
+fn ornamentedMelody() {
+    // 函式實作
+}
+```
+
+### 4. 音量管理
+```musiclang
+// 為不同樂器設定合適音量
+refinst = piano
+refVolume(0.8)     // 主旋律較響
+
+refinst = violin
+refVolume(0.6)     // 和聲較輕
+
+refinst = drums
+refVolume(0.4)     // 打擊樂最輕
+```
+
+## 常見錯誤
+
+### 1. 語法錯誤
+```musiclang
+// ❌ 錯誤：缺少逗號
+note C4 1.0
+
+// ✅ 正確
+note C4, 1.0
+
+// ❌ 錯誤：音符格式錯誤
+note C44, 1.0
+
+// ✅ 正確
+note C4, 1.0
+```
+
+### 2. 邏輯錯誤
+```musiclang
+// ❌ 錯誤：無限迴圈
+counter = 0
+while (counter < 10) {
+    note C4, 0.5
+    // 忘記增加 counter
+}
+
+// ✅ 正確
+counter = 0
+while (counter < 10) {
+    note C4, 0.5
+    counter = counter + 1
+}
+```
+
+### 3. 樂器名稱錯誤
+```musiclang
+// ❌ 錯誤：不存在的樂器
+refinst = clarinet
+
+// ✅ 正確：使用支援的樂器
+refinst = flute
+```
+
+### 4. 音符範圍錯誤
+```musiclang
+// ❌ 錯誤：八度超出範圍
+note C9, 1.0
+
+// ✅ 正確：使用合理八度
+note C5, 1.0
+```
+
+## 🎯 快速參考
+
+### 基本語句速查
+```musiclang
+tempo 120                    // 設定速度
+volume 0.8                   // 設定音量
+refinst = piano              // 切換樂器
+note C4, 1.0                 // 播放音符
+chord [C4, E4, G4], 2.0      // 播放和弦
+```
+
+### 控制流速查
+```musiclang
+loop 3 { ... }               // 固定迴圈
+for (i, 0:5) { ... }         // for 迴圈
+while (condition) { ... }    // while 迴圈
+if (condition) { ... }       // 條件判斷
+```
+
+### 函式速查
+```musiclang
+fn name() { ... }            // 定義函式
+name()                       // 呼叫函式
+refVolume(0.8)              // ref 函式
+```
 #
