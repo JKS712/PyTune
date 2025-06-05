@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-main.py - PyTune 音樂程式語言主執行檔（支援音色功能）
+main.py - PyTune 音樂程式語言主執行檔（支援音色與休止符功能）
 """
 
 import sys
@@ -17,7 +17,7 @@ def import_audio_modules():
     try:
         # 嘗試導入增強音訊引擎
         from audio.audio_engine import EnhancedAudioEngine
-        print("✅ 成功載入增強音訊引擎（支援音色）")
+        print("✅ 成功載入增強音訊引擎（支援音色與休止符）")
         return EnhancedAudioEngine, 'enhanced'
     except ImportError as e:
         print(f"⚠️  增強音訊引擎載入失敗: {e}")
@@ -25,7 +25,7 @@ def import_audio_modules():
         try:
             # 回退到原始音訊引擎
             from audio.audio_engine import AudioEngine
-            print("✅ 載入原始音訊引擎")
+            print("✅ 載入原始音訊引擎（支援休止符）")
             return AudioEngine, 'original'
         except ImportError as e:
             print(f"❌ 無法導入音訊引擎模組: {e}")
@@ -35,15 +35,15 @@ def import_audio_modules():
 def import_parser():
     """動態導入解析器"""
     try:
-        # 嘗試導入支援音色的解析器
+        # 嘗試導入支援音色和休止符的解析器
         from parser.parser import MusicLanguageParser
-        print("✅ 成功載入支援音色的解析器")
+        print("✅ 成功載入支援音色與休止符的解析器")
         return MusicLanguageParser, True
     except ImportError:
         try:
             # 回退到原始解析器
             from parser.parser import MusicLanguageParser
-            print("⚠️  載入原始解析器（不支援音色）")
+            print("⚠️  載入原始解析器（可能不支援部分功能）")
             return MusicLanguageParser, False
         except ImportError as e:
             print(f"❌ 無法導入解析器: {e}")
@@ -96,9 +96,9 @@ def play_music_file(filename):
         
         # 檢查是否使用了音色功能
         if supports_instruments:
-            print("🎼 音色功能已啟用")
+            print("🎼 音色與休止符功能已啟用")
         else:
-            print("⚠️  當前版本不支援音色功能")
+            print("⚠️  當前版本可能不支援部分功能")
         
         # 執行音樂程式
         print("🎵 開始播放音樂...")
@@ -179,6 +179,7 @@ def interactive_mode():
     print("輸入 'help' 查看說明")
     print("輸入 'examples' 查看範例檔案")
     print("輸入 'status' 查看系統狀態")
+    print("輸入 'test-rest' 測試休止符功能")
     
     # 導入模組
     AudioEngine, engine_type = import_audio_modules()
@@ -201,7 +202,7 @@ def interactive_mode():
                 audio_engine = AudioEngine()
         
         parser = MusicParser()
-        print(f"🎼 系統狀態: 音色支援 {'✅' if supports_instruments else '❌'}")
+        print(f"🎼 系統狀態: 音色支援 {'✅' if supports_instruments else '❌'}, 休止符支援 ✅")
         
     except Exception as e:
         print(f"❌ 系統初始化失敗: {e}")
@@ -222,6 +223,9 @@ def interactive_mode():
             elif code.lower() == 'status':
                 show_status(engine_type, supports_instruments)
                 continue
+            elif code.lower() == 'test-rest':
+                test_rest_functionality(audio_engine)
+                continue
             elif code.strip() == '':
                 continue
             
@@ -239,11 +243,38 @@ def interactive_mode():
         except Exception as e:
             print(f"❌ 錯誤: {e}")
 
+def test_rest_functionality(audio_engine):
+    """測試休止符功能"""
+    print("\n🎵 測試休止符功能...")
+    
+    try:
+        # 測試基本休止符
+        print("播放音符 C4")
+        audio_engine.play_note('C4', 0.5)
+        
+        print("休止符 1 秒")
+        audio_engine.play_rest(1.0)
+        
+        print("播放音符 E4")
+        audio_engine.play_note('E4', 0.5)
+        
+        print("休止符 0.5 秒")
+        audio_engine.play_rest(0.5)
+        
+        print("播放和弦 [C4, E4, G4]")
+        audio_engine.play_chord(['C4', 'E4', 'G4'], 1.0)
+        
+        print("✅ 休止符功能測試完成！")
+        
+    except Exception as e:
+        print(f"❌ 休止符測試失敗: {e}")
+
 def show_status(engine_type, supports_instruments):
     """顯示系統狀態"""
     print("\n🔧 PyTune 系統狀態:")
     print(f"   音訊引擎: {engine_type}")
     print(f"   音色支援: {'✅ 已啟用' if supports_instruments else '❌ 未支援'}")
+    print(f"   休止符支援: ✅ 已啟用")
     print(f"   Python 版本: {sys.version.split()[0]}")
     
     # 檢查相依套件
@@ -285,6 +316,11 @@ def show_examples():
             print("   ⚠️  examples 目錄為空")
     else:
         print("   ❌ 找不到 examples 目錄")
+    
+    # 顯示休止符範例
+    print("\n🔇 休止符範例：")
+    print("   note C4, 1.0; rest 0.5; note E4, 1.0")
+    print("   chord [C4, E4, G4], 2.0; rest 1.0; note C5, 1.0")
 
 def show_help(supports_instruments=False):
     """顯示說明"""
@@ -295,16 +331,23 @@ def show_help(supports_instruments=False):
   note C4, 1.0              # 播放音符
   note [C4, D4, E4], 0.5    # 播放音符陣列
   chord [C4, E4, G4], 2.0   # 播放和弦
+  rest 1.0                  # 休止符（靜默1秒）
+  rest 0.5                  # 短休止符
   tempo 120                 # 設定速度
   volume 0.8                # 設定音量"""
 
     if supports_instruments:
         help_text += """
-  instrument piano          # 設定音色（鋼琴）
-  instrument violin         # 設定音色（小提琴）"""
+  refinst = piano           # 設定音色（鋼琴）
+  refinst = violin          # 設定音色（小提琴）"""
 
     help_text += """
 
+休止符用法：
+  rest 1.0                  # 1秒休止符
+  rest 0.25                 # 0.25秒休止符
+  note C4, 0.5; rest 0.5    # 音符後接休止符
+  
 控制流：
   for (i, 0:5) { ... }      # for 迴圈
   while (condition) { ... } # while 迴圈
@@ -318,12 +361,31 @@ def show_help(supports_instruments=False):
 
     if supports_instruments:
         help_text += """
-  refInstrument("piano")   # 設定音色"""
+  refInst(piano)           # 設定音色"""
 
     help_text += """
 
-範例：
-  tempo 120; note [C4, E4, G4], 0.5; chord [C4, E4, G4], 1.0
+範例程式：
+  // 簡單旋律與休止符
+  tempo 120
+  refinst = piano
+  note C4, 0.5
+  rest 0.25
+  note E4, 0.5  
+  rest 0.25
+  note G4, 1.0
+
+  // 節奏模式
+  fn rhythm_pattern() {
+      note C4, 0.25
+      rest 0.25
+      note E4, 0.25
+      rest 0.25
+  }
+  
+  loop 4 {
+      rhythm_pattern()
+  }
 
 檔案格式：
   • PyTune 程式檔案使用 .ptm 副檔名
@@ -334,6 +396,7 @@ def show_help(supports_instruments=False):
 指令：
   status                    # 查看系統狀態
   examples                  # 查看範例檔案
+  test-rest                 # 測試休止符功能
   help                      # 顯示此說明
 """
     print(help_text)
@@ -341,15 +404,16 @@ def show_help(supports_instruments=False):
 def main():
     """主函式"""
     parser = argparse.ArgumentParser(
-        description="PyTune - 音樂程式語言執行器",
+        description="PyTune - 音樂程式語言執行器（支援休止符）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 範例：
   python main.py examples/twinkle_star.ptm     # 執行檔案
-  python main.py -c "note C4, 1.0"            # 執行程式碼
+  python main.py -c "note C4, 1.0; rest 0.5"  # 執行程式碼（含休止符）
   python main.py -i                           # 互動模式
   python main.py -v examples/test.ptm         # 詳細模式
   python main.py --status                     # 系統狀態
+  python main.py --test                       # 音訊系統測試
         """
     )
     
@@ -388,6 +452,12 @@ def main():
         help='執行音訊系統測試'
     )
     
+    parser.add_argument(
+        '--demo-rest', '-dr',
+        action='store_true',
+        help='演示休止符功能'
+    )
+    
     args = parser.parse_args()
     
     # 設定詳細模式
@@ -410,6 +480,39 @@ def main():
             os.system(f"python {test_file}")
         else:
             print("❌ 找不到 test_audio_setup.py")
+        return
+    
+    # 休止符演示模式
+    if args.demo_rest:
+        print("🔇 休止符功能演示...")
+        demo_code = '''
+        tempo 120
+        refinst = piano
+        
+        note C4, 0.5
+        rest 0.5
+        note E4, 0.5
+        rest 0.5
+        note G4, 1.0
+        rest 1.0
+        
+        chord [C4, E4, G4], 2.0
+        rest 2.0
+        
+        fn melody_with_rests() {
+            note C4, 0.25
+            rest 0.25
+            note D4, 0.25
+            rest 0.25
+            note E4, 0.25
+            rest 0.25
+            note F4, 0.25
+            rest 0.25
+        }
+        
+        melody_with_rests()
+        '''
+        play_music_code(demo_code)
         return
     
     # 執行模式判斷

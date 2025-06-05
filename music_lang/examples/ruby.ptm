@@ -1,0 +1,231 @@
+// ruby.ptm - 修復的 PyTune 範例檔案
+// 樂譜轉換為 PyTune 程式碼（包含休止符）
+// BPM = 132, B大調, 每次高八度換不同樂器
+
+tempo 132
+volume 0.7
+
+// === 第54小節開始 - 添加適當的休止符 ===
+// 使用鋼琴演奏基本音域
+refinst = piano
+
+// 第54小節 - 八分音符流動樂句與休止符
+note [F#4, G#4, A#4, B4], 0.125
+rest 0.0625
+note [C#5, D#5], 0.25
+rest 0.125
+note B4, 0.5
+
+// 第55小節 - 樂句間的呼吸
+note [F#4, G#4], 0.25
+rest 0.0625
+note [A#4, B4, C#5], 0.125
+note D#5, 0.375
+rest 0.125
+note C#5, 0.25
+
+// 第56小節 - 和弦與旋律結合，加入節奏感
+chord [F#4, A#4, C#5], 0.5
+rest 0.25
+note [D#5, E5, F#5], 0.125
+rest 0.0625
+note G#5, 0.375
+
+// === 第57-58小節 高八度段落 ===
+// 8va 記號 - 切換到小提琴
+refinst = violin
+
+rest 0.5
+
+// 高八度演奏
+note [F#5, G#5, A#5, B5], 0.125
+rest 0.125
+note [C#6, D#6], 0.25
+rest 0.25
+note B5, 0.5
+
+// 連續十六分音符樂句
+note [G#5, A#5, B5, C#6], 0.0625
+rest 0.0625
+note [D#6, E6, F#6, G#6], 0.0625
+rest 0.125
+note [A#6, B6], 0.25
+
+// === 第59-60小節 ===
+// 繼續高音域 - 切換到長笛
+refinst = flute
+
+rest 0.75
+
+note [F#6, E6, D#6, C#6], 0.125
+rest 0.25
+note B5, 0.25
+note [A#5, G#5], 0.125
+rest 0.125
+note F#5, 0.25
+
+// 裝飾音樂句
+rest 0.25
+note [G#5, F#5, G#5, A#5], 0.0625
+rest 0.0625
+note B5, 0.25
+
+// === 第61-62小節 回到中音域 ===
+// 切換到大提琴
+refinst = cello
+
+rest 1.0
+
+note [F#4, A#4, D#5], 0.25
+rest 0.25
+chord [F#4, B4, D#5], 0.5
+rest 0.25
+note C#5, 0.25
+
+// 和弦進行
+chord [G#4, B4, E5], 0.5
+rest 0.5
+chord [F#4, A#4, C#5], 0.5
+rest 0.75
+
+// === 第63-64小節 華彩樂句 ===
+// 切換到鋼琴進行華彩
+refinst = piano
+
+rest 0.5
+
+// 快速音階上行
+note [B4, C#5, D#5, E5], 0.0625
+rest 0.03125
+note [F#5, G#5, A#5, B5], 0.0625
+rest 0.0625
+note [C#6, B5, A#5, G#5], 0.125
+
+// 下行音階
+rest 0.25
+note [F#5, E5, D#5, C#5], 0.0625
+rest 0.03125
+note [B4, A#4, G#4, F#4], 0.0625
+
+// === 第65小節開始 終結段落 ===
+// 使用管風琴營造莊嚴感
+refinst = organ
+
+rest 1.5
+
+// 和弦終結
+chord [F#4, B4, D#5, F#5], 1.0
+rest 0.5
+chord [G#4, C#5, E5, G#5], 1.0
+rest 1.0
+
+// 最終和弦
+chord [B3, F#4, B4, D#5, F#5, B5], 2.0
+rest 3.0
+
+// === 創作休止符節奏模式 ===
+
+fn rhythmic_pattern_with_rests() {
+    // 創造有節奏感的音符與休止符組合
+    note C4, 0.25
+    rest 0.25
+    note E4, 0.125
+    rest 0.125
+    note G4, 0.5
+    rest 0.5
+}
+
+fn syncopated_rhythm() {
+    // 切分節奏模式
+    rest 0.125
+    note F#4, 0.25
+    rest 0.0625
+    note A#4, 0.125
+    rest 0.25
+    note D#5, 0.375
+    rest 0.125
+}
+
+// === 不同樂器的休止符展示 ===
+
+fn instrument_showcase_with_rests() {
+    // 每種樂器都有其特色的休止符運用
+    
+    // 鋼琴 - 清晰的休止符
+    refinst = piano
+    note C4, 0.5
+    rest 0.25
+    note E4, 0.5
+    rest 0.5
+    
+    // 小提琴 - 弓法換向的休止
+    refinst = violin
+    note G4, 0.75
+    rest 0.125
+    note B4, 0.75
+    rest 0.25
+    
+    // 管樂器 - 呼吸間隙
+    refinst = flute
+    note D5, 1.0
+    rest 0.5
+    note F#5, 1.0
+    rest 0.75
+    
+    // 打擊樂 - 節奏重音
+    refinst = drums
+    note C3, 0.25
+    rest 0.25
+    note C3, 0.25
+    rest 0.75
+}
+
+// === 複合節奏模式 ===
+
+fn complex_rhythm_with_rests() {
+    // 複雜的節奏模式包含各種休止符
+    
+    refinst = trumpet
+    
+    // 主題呈示
+    note B4, 0.375
+    rest 0.125
+    note D5, 0.25
+    rest 0.0625
+    note F#5, 0.1875
+    
+    // 呼應樂句
+    rest 0.5
+    note A5, 0.25
+    rest 0.25
+    note F#5, 0.25
+    rest 0.125
+    note D5, 0.375
+    
+    // 終結
+    rest 1.0
+    note B4, 2.0
+}
+
+// === 執行示範 ===
+
+// 執行基本節奏模式
+rhythmic_pattern_with_rests()
+syncopated_rhythm()
+
+// 執行樂器展示
+instrument_showcase_with_rests()
+
+// 執行複合節奏
+complex_rhythm_with_rests()
+
+// === 迴圈中的休止符 ===
+
+for (i, 0:4) {
+    refinst = piano
+    note C4, 0.25
+    rest 0.25
+}
+
+// 結尾的長休止符
+rest 2.0

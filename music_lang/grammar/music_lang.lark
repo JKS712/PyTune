@@ -1,5 +1,5 @@
 // music_lang.lark - 完整的音樂程式語言語法定義
-// 支援多樂器、控制流、函式等完整功能
+// 支援多樂器、控制流、函式、休止符等完整功能
 
 ?start: statement*
 
@@ -8,6 +8,7 @@
           | tempo_stmt
           | volume_stmt
           | instrument_stmt
+          | rest_stmt
           | loop_stmt
           | fn_stmt
           | fn_call_stmt
@@ -31,6 +32,9 @@ note_array: "[" note_list "]"
 
 // 和弦語句  
 chord_stmt: "chord" chord_literal ("," duration)?
+
+// 休止符語句
+rest_stmt: "rest" expression
 
 // 速度設定
 tempo_stmt: "tempo" number

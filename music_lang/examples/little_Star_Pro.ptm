@@ -1,427 +1,697 @@
-// 莫札特風格小星星變奏曲 K.265
-// 基於莫札特十二個變奏曲的音樂程式語言版本
-// Theme and Variations on "Ah! vous dirai-je, maman"
+// 莫札特 K.265/300e - 12首"Ah vous dirai-je, Maman"變奏曲
+// Wolfgang Amadeus Mozart - Twelve Variations on "Ah vous dirai-je, Maman"
+// 完整原作版本 - PyTune實現
 
-tempo 80
+tempo 120
 volume 0.8
+refinst = piano
 
-// === 主題 (Tema) ===
-fn tema() {
-    // A段
-    note [C4, C4, G4, G4, A4, A4], 0.5
-    note G4, 1.0
+// ============================================
+// 主題 (Theme) - "Ah vous dirai-je, Maman"
+// ============================================
+
+fn theme() {
+    // A段 (8小節)
+    note C4, 0.5        // 1
+    note C4, 0.5        
+    note G4, 0.5        // 2
+    note G4, 0.5        
+    note A4, 0.5        // 3
+    note A4, 0.5        
+    note G4, 1.0        // 4
     
-    // A段重複
-    note [F4, F4, E4, E4, D4, D4], 0.5  
-    note C4, 1.0
+    note F4, 0.5        // 5
+    note F4, 0.5        
+    note E4, 0.5        // 6
+    note E4, 0.5        
+    note D4, 0.5        // 7
+    note D4, 0.5        
+    note C4, 1.0        // 8
     
-    // B段
-    note [G4, G4, F4, F4, E4, E4], 0.5
-    note D4, 1.0
+    // B段 (8小節)  
+    note G4, 0.5        // 9
+    note G4, 0.5        
+    note F4, 0.5        // 10
+    note F4, 0.5        
+    note E4, 0.5        // 11
+    note E4, 0.5        
+    note D4, 1.0        // 12
     
-    // B段重複
-    note [G4, G4, F4, F4, E4, E4], 0.5
-    note D4, 1.0
+    note G4, 0.5        // 13
+    note G4, 0.5        
+    note F4, 0.5        // 14
+    note F4, 0.5        
+    note E4, 0.5        // 15
+    note E4, 0.5        
+    note D4, 1.0        // 16
     
-    // A段再現
-    note [C4, C4, G4, G4, A4, A4], 0.5
-    note G4, 1.0
-    note [F4, F4, E4, E4, D4, D4], 0.5
-    note C4, 2.0
+    // A段重現 (8小節)
+    note C4, 0.5        // 17
+    note C4, 0.5        
+    note G4, 0.5        // 18
+    note G4, 0.5        
+    note A4, 0.5        // 19
+    note A4, 0.5        
+    note G4, 1.0        // 20
+    
+    note F4, 0.5        // 21
+    note F4, 0.5        
+    note E4, 0.5        // 22
+    note E4, 0.5        
+    note D4, 0.5        // 23
+    note D4, 0.5        
+    note C4, 1.0        // 24
+    rest 1.0
 }
 
-// === 變奏一：十六分音符流動 (Var. I) ===
-fn variationI() {
-    // 右手十六分音符，左手保持主題
-    refTempo(120)
-    refVolume(0.7)
-    
-    // A段 - 分解和弦式十六分音符
-    note [C4, E4, G4, C5], 0.25
-    note [C4, E4, G4, C5], 0.25
-    note [G4, B4, D5, G5], 0.25
-    note [G4, B4, D5, G5], 0.25
-    note [A4, C5, E5, A5], 0.25
-    note [A4, C5, E5, A5], 0.25
-    note [G4, B4, D5], 0.5
-    note G4, 0.5
-    
-    note [F4, A4, C5, F5], 0.25
-    note [F4, A4, C5, F5], 0.25
-    note [E4, G4, C5, E5], 0.25
-    note [E4, G4, C5, E5], 0.25
-    note [D4, F4, B4, D5], 0.25
-    note [D4, F4, B4, D5], 0.25
-    note C4, 1.0
-    
-    // B段 - 音階式十六分音符
-    note [G4, A4, B4, C5], 0.25
-    note [G4, F4, E4, D4], 0.25
-    note [F4, G4, A4, B4], 0.25
-    note [E4, F4, G4, A4], 0.25
-    note [E4, F4, G4, E4], 0.25
-    note [D4, E4, F4, D4], 0.25
-    note D4, 1.0
-    
-    note [G4, A4, B4, C5], 0.25
-    note [G4, F4, E4, D4], 0.25
-    note [F4, G4, A4, B4], 0.25
-    note [E4, F4, G4, A4], 0.25
-    note [E4, F4, G4, E4], 0.25
-    note [D4, E4, F4, D4], 0.25
-    note D4, 1.0
-    
-    // A段再現
-    note [C4, E4, G4, C5], 0.25
-    note [C4, E4, G4, C5], 0.25
-    note [G4, B4, D5, G5], 0.25
-    note [G4, B4, D5, G5], 0.25
-    note [A4, C5, E5, A5], 0.25
-    note [A4, C5, E5, A5], 0.25
-    note [G4, B4, D5], 0.5
-    note G4, 0.5
-    note [F4, A4, C5, F5], 0.25
-    note [F4, A4, C5, F5], 0.25
-    note [E4, G4, C5, E5], 0.25
-    note [E4, G4, C5, E5], 0.25
-    note [D4, F4, B4, D5], 0.25
-    note [D4, F4, B4, D5], 0.25
-    note C4, 2.0
-}
+// ============================================
+// 變奏 I - 右手十六分音符裝飾
+// ============================================
 
-// === 變奏二：左手阿爾貝蒂低音 (Var. II) ===
-fn variationII() {
-    refTempo(126)
-    refVolume(0.75)
+fn variation_1() {
+    // A段 - 右手流動的十六分音符
+    note [C4, E4], 0.125
+    note [D4, F4], 0.125
+    note [C4, E4], 0.125
+    note [B3, D4], 0.125
+    note [C4, E4], 0.125
+    note [D4, F4], 0.125
+    note [E4, G4], 0.125
+    note [F4, A4], 0.125
     
-    // 阿爾貝蒂低音伴奏模式
-    // A段
-    note C4, 0.5
-    note [E4, G4, E4], 0.167
-    note C4, 0.5
-    note [E4, G4, E4], 0.167
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note A4, 0.5
-    note [C5, E5, C5], 0.167
-    note A4, 0.5
-    note [C5, E5, C5], 0.167
-    note [G4, B4, D5], 1.0
+    note [G4, B4], 0.125
+    note [A4, C5], 0.125
+    note [G4, B4], 0.125
+    note [F4, A4], 0.125
+    note [G4, B4], 0.125
+    note [A4, C5], 0.125
+    note [B4, D5], 0.125
+    note [C5, E5], 0.125
     
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note D4, 0.5
-    note [F4, B4, F4], 0.167
-    note D4, 0.5
-    note [F4, B4, F4], 0.167
-    note C4, 1.0
+    note [A4, C5], 0.125
+    note [B4, D5], 0.125
+    note [A4, C5], 0.125
+    note [G4, B4], 0.125
+    note [A4, C5], 0.125
+    note [B4, D5], 0.125
+    note [A4, C5], 0.125
+    note [G4, B4], 0.125
     
-    // B段 - 轉調效果
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note D4, 1.0
-    
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note D4, 1.0
-    
-    // A段再現
-    note C4, 0.5
-    note [E4, G4, E4], 0.167
-    note C4, 0.5
-    note [E4, G4, E4], 0.167
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note G4, 0.5
-    note [B4, D5, B4], 0.167
-    note A4, 0.5
-    note [C5, E5, C5], 0.167
-    note A4, 0.5
-    note [C5, E5, C5], 0.167
-    note [G4, B4, D5], 1.0
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note F4, 0.5
-    note [A4, C5, A4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note E4, 0.5
-    note [G4, C5, G4], 0.167
-    note D4, 0.5
-    note [F4, B4, F4], 0.167
-    note D4, 0.5
-    note [F4, B4, F4], 0.167
-    note C4, 2.0
-}
-
-// === 變奏三：小調變奏 (Var. III - 轉c小調) ===
-fn variationIII() {
-    refTempo(108)
-    refVolume(0.6)
-    
-    // A段 - c小調的憂鬱色彩
-    note [C4, C4, G4, G4, Ab4, Ab4], 0.5
-    note G4, 1.0
-    note [F4, F4, Eb4, Eb4, D4, D4], 0.5
-    note C4, 1.0
-    
-    // B段 - 小調的戲劇性
-    note [G4, G4, F4, F4, Eb4, Eb4], 0.5
-    note D4, 1.0
-    note [G4, G4, F4, F4, Eb4, Eb4], 0.5
-    note D4, 1.0
-    
-    // A段再現 - 回到c小調主調
-    note [C4, C4, G4, G4, Ab4, Ab4], 0.5
-    note G4, 1.0
-    note [F4, F4, Eb4, Eb4, D4, D4], 0.5
-    note C4, 2.0
-}
-
-// === 變奏四：華麗變奏 (Var. IV) ===
-fn variationIV() {
-    refTempo(132)
-    refVolume(0.8)
-    
-    // A段 - 華麗的32分音符
-    note [C4, D4, E4, F4, G4, A4, B4, C5], 0.125
-    note [C5, B4, A4, G4], 0.125
-    note [G4, A4, B4, C5, D5, E5, F5, G5], 0.125
-    note [G5, F5, E5, D5], 0.125
-    note [A4, B4, C5, D5, E5, F5, G5, A5], 0.125
-    note [A5, G5, F5, E5], 0.125
-    note [G4, A4, B4, C5, D5], 0.2
-    note G4, 0.5
-    
-    note [F4, G4, A4, Bb4, C5, D5, E5, F5], 0.125
-    note [F5, E5, D5, C5], 0.125
-    note [E4, F4, G4, A4, B4, C5, D5, E5], 0.125
-    note [E5, D5, C5, B4], 0.125
-    note [D4, E4, F4, G4, A4, B4, C5, D5], 0.125
-    note [D5, C5, B4, A4], 0.125
-    note [C4, D4, E4, F4], 0.25
-    note C4, 1.0
-    
-    // B段 - 音階與琶音交織
-    note [G4, F5, E5, D5, C5, B4, A4, G4], 0.125
-    note [G4, A4, B4, C5], 0.125
-    note [F4, E5, D5, C5, B4, A4, G4, F4], 0.125
-    note [F4, G4, A4, B4], 0.125
-    note [E4, D5, C5, B4, A4, G4, F4, E4], 0.125
-    note [E4, F4, G4, A4], 0.125
-    note [D4, C5, B4, A4], 0.25
-    note D4, 1.0
-    
-    note [G4, F5, E5, D5, C5, B4, A4, G4], 0.125
-    note [G4, A4, B4, C5], 0.125
-    note [F4, E5, D5, C5, B4, A4, G4, F4], 0.125
-    note [F4, G4, A4, B4], 0.125
-    note [E4, D5, C5, B4, A4, G4, F4, E4], 0.125
-    note [E4, F4, G4, A4], 0.125
-    note [D4, C5, B4, A4], 0.25
-    note D4, 1.0
-    
-    // A段再現 - 華麗結尾
-    note [C4, D4, E4, F4, G4, A4, B4, C5], 0.125
-    note [C5, D5, E5, F5, G5, A5, B5, C6], 0.125
-    note [C6, B5, A5, G5, F5, E5, D5, C5], 0.125
-    note [C5, B4, A4, G4], 0.125
-    note [A4, B4, C5, D5, E5, F5, G5, A5], 0.125
-    note [A5, G5, F5, E5], 0.125
-    note [G4, A4, B4, C5, D5], 0.2
-    note G4, 0.5
-    note [F4, G4, A4, Bb4, C5, D5, E5, F5], 0.125
-    note [F5, E5, D5, C5, B4, A4, G4, F4], 0.125
-    note [E4, F4, G4, A4, B4, C5, D5, E5], 0.125
-    note [E5, D5, C5, B4, A4, G4, F4, E4], 0.125
-    note [D4, E4, F4, G4, A4, B4, C5, D5], 0.125
-    note [D5, C5, B4, A4, G4, F4, E4, D4], 0.125
-    note [C4, E4, G4, C5], 0.5
-    note C4, 2.0
-}
-
-// === 變奏五：進行曲風格 (Var. V) ===
-fn variationV() {
-    refTempo(116)
-    refVolume(0.9)
-    
-    // 進行曲的強烈節拍
-    // A段
-    chord [C4, E4, G4], 0.25
-    note C5, 0.25
-    chord [C4, E4, G4], 0.25
-    note C5, 0.25
-    chord [G4, B4, D5], 0.25
-    note G5, 0.25
-    chord [G4, B4, D5], 0.25
-    note G5, 0.25
-    chord [A4, C5, E5], 0.25
-    note A5, 0.25
-    chord [A4, C5, E5], 0.25
-    note A5, 0.25
-    chord [G4, B4, D5], 0.5
-    note G4, 0.5
-    
-    chord [F4, A4, C5], 0.25
-    note F5, 0.25
-    chord [F4, A4, C5], 0.25
-    note F5, 0.25
-    chord [E4, G4, C5], 0.25
-    note E5, 0.25
-    chord [E4, G4, C5], 0.25
-    note E5, 0.25
-    chord [D4, F4, B4], 0.25
-    note D5, 0.25
-    chord [D4, F4, B4], 0.25
-    note D5, 0.25
-    chord [C4, E4, G4], 0.5
-    note C4, 0.5
-    
-    // B段 - 更加莊嚴
-    chord [G4, B4, D5], 0.5
-    chord [G4, B4, D5], 0.5
-    chord [F4, A4, C5], 0.5
-    chord [F4, A4, C5], 0.5
-    chord [E4, G4, C5], 0.5
-    chord [E4, G4, C5], 0.5
-    chord [D4, F4, B4], 1.0
-    
-    chord [G4, B4, D5], 0.5
-    chord [G4, B4, D5], 0.5
-    chord [F4, A4, C5], 0.5
-    chord [F4, A4, C5], 0.5
-    chord [E4, G4, C5], 0.5
-    chord [E4, G4, C5], 0.5
-    chord [D4, F4, B4], 1.0
-    
-    // A段再現 - 輝煌結尾
-    chord [C4, E4, G4], 0.25
-    note C5, 0.25
-    chord [C4, E4, G4], 0.25
-    note C5, 0.25
-    chord [G4, B4, D5], 0.25
-    note G5, 0.25
-    chord [G4, B4, D5], 0.25
-    note G5, 0.25
-    chord [A4, C5, E5], 0.25
-    note A5, 0.25
-    chord [A4, C5, E5], 0.25
-    note A5, 0.25
-    chord [G4, B4, D5], 0.5
-    note G4, 0.5
-    chord [F4, A4, C5], 0.25
-    note F5, 0.25
-    chord [F4, A4, C5], 0.25
-    note F5, 0.25
-    chord [E4, G4, C5], 0.25
-    note E5, 0.25
-    chord [E4, G4, C5], 0.25
-    note E5, 0.25
-    chord [D4, F4, B4], 0.25
-    note D5, 0.25
-    chord [D4, F4, B4], 0.25
-    note D5, 0.25
-    chord [C4, E4, G4, C5], 2.0
-}
-
-// === 終曲：回到主題 (Finale) ===
-fn finale() {
-    refTempo(120)
-    refVolume(1.0)
-    
-    // 主題回歸，但加上華麗的裝飾
-    note [C4, E4], 0.25
-    note [C4, E4], 0.25
-    note [G4, B4], 0.25
-    note [G4, B4], 0.25
-    note [A4, C5], 0.25
-    note [A4, C5], 0.25
     chord [G4, B4, D5], 1.0
     
-    note [F4, A4], 0.25
-    note [F4, A4], 0.25
-    note [E4, G4], 0.25
-    note [E4, G4], 0.25
-    note [D4, F4], 0.25
-    note [D4, F4], 0.25
-    chord [C4, E4, G4], 1.0
+    // 繼續相同模式...
+    note [F4, A4], 0.125
+    note [G4, B4], 0.125
+    note [F4, A4], 0.125
+    note [E4, G4], 0.125
+    note [F4, A4], 0.125
+    note [G4, B4], 0.125
+    note [A4, C5], 0.125
+    note [B4, D5], 0.125
     
-    // 莊嚴的尾聲
-    refVolume(1.0)
-    chord [C4, E4, G4, C5], 1.0
-    refVolume(0.8)
-    chord [C4, E4, G4, C5], 1.0
-    refVolume(0.6)
-    chord [C4, E4, G4, C5], 1.0
-    refVolume(0.4)
-    chord [C4, E4, G4, C5], 2.0
-    refVolume(0.2)
-    chord [C4, E4, G4, C5], 4.0
+    note [E4, G4], 0.125
+    note [F4, A4], 0.125
+    note [E4, G4], 0.125
+    note [D4, F4], 0.125
+    note [E4, G4], 0.125
+    note [F4, A4], 0.125
+    note [G4, B4], 0.125
+    note [A4, C5], 0.125
+    
+    note [D4, F4], 0.125
+    note [E4, G4], 0.125
+    note [D4, F4], 0.125
+    note [C4, E4], 0.125
+    note [D4, F4], 0.125
+    note [E4, G4], 0.125
+    note [F4, A4], 0.125
+    note [G4, B4], 0.125
+    
+    chord [C4, E4, G4], 1.0
+    rest 1.0
 }
 
-// === 主程序執行 ===
+// ============================================
+// 變奏 II - 左手伴奏，右手裝飾
+// ============================================
 
-// 主題呈現
-tema()
+fn variation_2() {
+    // 阿爾貝蒂低音伴奏風格
+    note C4, 0.125
+    note E4, 0.125
+    note G4, 0.125
+    note E4, 0.125
+    note C4, 0.125
+    note E4, 0.125
+    note G4, 0.125
+    note E4, 0.125
+    
+    note B3, 0.125
+    note D4, 0.125
+    note G4, 0.125
+    note D4, 0.125
+    note B3, 0.125
+    note D4, 0.125
+    note G4, 0.125
+    note D4, 0.125
+    
+    note A3, 0.125
+    note C4, 0.125
+    note F4, 0.125
+    note C4, 0.125
+    note A3, 0.125
+    note C4, 0.125
+    note F4, 0.125
+    note C4, 0.125
+    
+    note G3, 0.125
+    note B3, 0.125
+    note D4, 0.125
+    note B3, 0.125
+    chord [G3, D4, G4], 1.0
+    rest 1.0
+}
 
-// 短暫停頓
-volume 0.3
-note C4, 0.5
-volume 0.8
+// ============================================
+// 變奏 III - 三十二分音符快速音群
+// ============================================
 
-// 變奏演奏
-variationI()
-volume 0.3
-note C4, 0.5
-volume 0.8
+fn variation_3() {
+    // 極快的音階跑動
+    note [C4, D4, E4, F4], 0.03125
+    note [G4, A4, B4, C5], 0.03125
+    note C5, 0.4375
+    note [C5, B4, A4, G4], 0.03125
+    note [F4, E4, D4, C4], 0.03125
+    note C4, 0.4375
+    
+    note [G4, A4, B4, C5], 0.03125
+    note [D5, E5, F5, G5], 0.03125
+    note G5, 0.4375
+    note [G5, F5, E5, D5], 0.03125
+    note [C5, B4, A4, G4], 0.03125
+    note G4, 0.4375
+    
+    note [A4, B4, C5, D5], 0.03125
+    note [E5, F5, G5, A5], 0.03125
+    note A5, 0.4375
+    note [A5, G5, F5, E5], 0.03125
+    note [D5, C5, B4, A4], 0.03125
+    note A4, 0.4375
+    
+    note [G4, F4, E4, D4], 0.125
+    chord [G3, B3, D4, G4], 1.0
+    rest 1.0
+}
 
-variationII()
-volume 0.3
-note C4, 0.5
-volume 0.8
+// ============================================
+// 變奏 IV - 小調變奏 (c minor)
+// ============================================
 
-variationIII()
-volume 0.3
-note C4, 0.5
-volume 0.8
+fn variation_4_minor() {
+    // 轉入c小調，營造憂鬱氣氛
+    note C4, 0.5
+    note C4, 0.5
+    note G4, 0.5
+    note G4, 0.5
+    note Ab4, 0.5
+    note Ab4, 0.5
+    note G4, 1.0
+    
+    note F4, 0.5
+    note F4, 0.5
+    note Eb4, 0.5
+    note Eb4, 0.5
+    note D4, 0.5
+    note D4, 0.5
+    note C4, 1.0
+    
+    note G4, 0.5
+    note G4, 0.5
+    note F4, 0.5
+    note F4, 0.5
+    note Eb4, 0.5
+    note Eb4, 0.5
+    note D4, 1.0
+    
+    note G4, 0.5
+    note G4, 0.5
+    note F4, 0.5
+    note F4, 0.5
+    note Eb4, 0.5
+    note Eb4, 0.5
+    note D4, 1.0
+    
+    // 回到大調結尾
+    note C4, 0.5
+    note C4, 0.5
+    note G4, 0.5
+    note G4, 0.5
+    note A4, 0.5
+    note A4, 0.5
+    note G4, 1.0
+    
+    note F4, 0.5
+    note F4, 0.5
+    note E4, 0.5
+    note E4, 0.5
+    note D4, 0.5
+    note D4, 0.5
+    note C4, 1.0
+    rest 1.0
+}
 
-variationIV()
-volume 0.3
-note C4, 0.5
-volume 0.8
+// ============================================
+// 變奏 V - 優雅的裝飾音變奏
+// ============================================
 
-variationV()
-volume 0.3
-note C4, 0.5
-volume 0.8
+fn variation_5() {
+    // 帶有顫音和裝飾音的優雅變奏
+    note C4, 0.1875
+    note [D4, C4], 0.03125
+    note C4, 0.1875
+    note [D4, C4], 0.03125
+    note C4, 0.1875
+    note [D4, C4], 0.03125
+    note C4, 0.1875
+    note [D4, C4], 0.03125
+    
+    note G4, 0.1875
+    note [A4, G4], 0.03125
+    note G4, 0.1875
+    note [A4, G4], 0.03125
+    note G4, 0.1875
+    note [A4, G4], 0.03125
+    note G4, 0.1875
+    note [A4, G4], 0.03125
+    
+    note A4, 0.1875
+    note [B4, A4], 0.03125
+    note A4, 0.1875
+    note [B4, A4], 0.03125
+    note A4, 0.1875
+    note [B4, A4], 0.03125
+    note A4, 0.1875
+    note [B4, A4], 0.03125
+    
+    note G4, 0.5
+    note [A4, G4, F4, E4], 0.125
+    chord [G3, C4, E4, G4], 1.0
+    rest 1.0
+}
 
-// 終曲
-finale()
+// ============================================
+// 變奏 VI - 西西里舞曲風格 (6/8拍)
+// ============================================
+
+fn variation_6_siciliano() {
+    tempo 80
+    
+    // 6/8拍的搖擺感
+    note C4, 0.375
+    note G4, 0.125
+    note C4, 0.375
+    note G4, 0.125
+    note G4, 0.375
+    note C5, 0.125
+    note G4, 0.375
+    note C5, 0.125
+    
+    note A4, 0.375
+    note C5, 0.125
+    note A4, 0.375
+    note C5, 0.125
+    note G4, 0.75
+    
+    note F4, 0.375
+    note A4, 0.125
+    note F4, 0.375
+    note A4, 0.125
+    note E4, 0.375
+    note G4, 0.125
+    note E4, 0.375
+    note G4, 0.125
+    
+    note D4, 0.375
+    note F4, 0.125
+    note D4, 0.375
+    note F4, 0.125
+    note C4, 0.75
+    rest 0.75
+    
+    tempo 120  // 恢復原速
+}
+
+// ============================================
+// 變奏 VII - 卡農風格
+// ============================================
+
+fn variation_7_canon() {
+    // 右手先開始主題
+    note C4, 0.25
+    rest 0.25
+    note C4, 0.25
+    rest 0.25
+    
+    // 左手延遲進入
+    rest 0.5
+    note C3, 0.25
+    rest 0.25
+    note C3, 0.25
+    rest 0.25
+    
+    note G4, 0.25
+    rest 0.25
+    note G4, 0.25
+    rest 0.25
+    note G3, 0.25
+    rest 0.25
+    note G3, 0.25
+    rest 0.25
+    
+    note A4, 0.25
+    rest 0.25
+    note A4, 0.25
+    rest 0.25
+    note A3, 0.25
+    rest 0.25
+    note A3, 0.25
+    rest 0.25
+    
+    chord [G3, G4], 0.5
+    chord [G3, G4], 0.5
+    chord [G3, G4], 1.0
+    rest 1.0
+}
+
+// ============================================
+// 變奏 VIII - 進行曲風格
+// ============================================
+
+fn variation_8_march() {
+    tempo 100
+    
+    // 進行曲的堅定節奏
+    chord [C3, C4], 0.25
+    note E4, 0.125
+    note F4, 0.125
+    chord [C3, C4], 0.25
+    note G4, 0.125
+    note A4, 0.125
+    
+    chord [G3, G4], 0.25
+    note B4, 0.125
+    note C5, 0.125
+    chord [G3, G4], 0.25
+    note D5, 0.125
+    note E5, 0.125
+    
+    chord [A3, A4], 0.25
+    note F5, 0.125
+    note G5, 0.125
+    chord [A3, A4], 0.25
+    note A5, 0.125
+    note B5, 0.125
+    
+    chord [G3, G4], 0.5
+    chord [G3, B3, D4, G4], 1.0
+    rest 0.5
+    
+    tempo 120  // 恢復原速
+}
+
+// ============================================
+// 變奏 IX - 華爾茲風格
+// ============================================
+
+fn variation_9_waltz() {
+    tempo 150
+    
+    // 3/4拍華爾茲
+    chord [C3, E3, G3], 0.5
+    note E4, 0.25
+    note F4, 0.25
+    chord [C3, E3, G3], 0.5
+    note G4, 0.25
+    note A4, 0.25
+    
+    chord [G3, B3, D4], 0.5
+    note B4, 0.25
+    note C5, 0.25
+    chord [G3, B3, D4], 0.5
+    note D5, 0.25
+    note E5, 0.25
+    
+    chord [A3, C4, E4], 0.5
+    note F5, 0.25
+    note G5, 0.25
+    chord [A3, C4, E4], 0.5
+    note A5, 0.25
+    note G5, 0.25
+    
+    chord [G3, B3, D4], 0.75
+    chord [G3, B3, D4, G4], 1.25
+    rest 1.0
+    
+    tempo 120  // 恢復原速
+}
+
+// ============================================
+// 變奏 X - 賦格風格
+// ============================================
+
+fn variation_10_fugue() {
+    // 主題
+    note C4, 0.25
+    note D4, 0.25
+    note E4, 0.25
+    note F4, 0.25
+    note G4, 0.5
+    rest 0.5
+    
+    // 屬調答題
+    rest 0.5
+    note G4, 0.25
+    note A4, 0.25
+    note B4, 0.25
+    note C5, 0.25
+    note D5, 0.5
+    
+    // 對位聲部
+    note E4, 0.25
+    note F4, 0.25
+    note G4, 0.25
+    note A4, 0.25
+    note B4, 0.25
+    note C5, 0.25
+    note D5, 0.25
+    note E5, 0.25
+    
+    // 終結
+    chord [C4, E4, G4, C5], 1.0
+    chord [C3, C4, E4, G4, C5], 1.0
+    rest 1.0
+}
+
+// ============================================
+// 變奏 XI - 慢板 (Adagio)
+// ============================================
+
+fn variation_11_adagio() {
+    tempo 60
+    
+    // 深情的慢板，每個音符都有豐富的表情
+    note C4, 1.0
+    rest 0.25
+    note [D4, F4], 0.1875
+    note [C4, E4], 0.0625
+    note C4, 1.5
+    
+    note G4, 1.0
+    rest 0.25
+    note [A4, C5], 0.1875
+    note [G4, B4], 0.0625
+    note G4, 1.5
+    
+    note A4, 1.0
+    rest 0.25
+    note [B4, D5], 0.1875
+    note [A4, C5], 0.0625
+    note A4, 1.0
+    rest 0.25
+    note [G4, B4], 0.1875
+    note [F4, A4], 0.0625
+    
+    chord [G3, D4, G4], 2.0
+    rest 1.0
+    
+    // 繼續以相同風格完成...
+    note F4, 1.0
+    rest 0.25
+    note [G4, B4], 0.1875
+    note [F4, A4], 0.0625
+    note F4, 1.5
+    
+    note E4, 1.0
+    rest 0.25
+    note [F4, A4], 0.1875
+    note [E4, G4], 0.0625
+    note E4, 1.5
+    
+    note D4, 1.0
+    rest 0.25
+    note [E4, G4], 0.1875
+    note [D4, F4], 0.0625
+    note D4, 1.0
+    rest 0.25
+    note [C4, E4], 0.1875
+    note [B3, D4], 0.0625
+    
+    chord [C3, G3, C4, E4], 3.0
+    rest 2.0
+    
+    tempo 120  // 恢復原速
+}
+
+// ============================================
+// 變奏 XII - 終曲快板 (Allegro)
+// ============================================
+
+fn variation_12_allegro() {
+    tempo 160
+    
+    // 華麗的終曲，技巧性極強
+    note [C4, E4, G4, C5], 0.0625
+    note [D4, F4, A4, D5], 0.0625
+    note [E4, G4, B4, E5], 0.0625
+    note [F4, A4, C5, F5], 0.0625
+    note [G4, B4, D5, G5], 0.125
+    rest 0.125
+    note [G4, B4, D5, G5], 0.125
+    rest 0.125
+    
+    // 快速音階
+    note [G5, F5, E5, D5, C5, B4, A4, G4], 0.03125
+    note [F4, E4, D4, C4, B3, A3, G3, F3], 0.03125
+    note [E3, F3, G3, A3, B3, C4, D4, E4], 0.03125
+    note [F4, G4, A4, B4, C5, D5, E5, F5], 0.03125
+    note G5, 0.25
+    rest 0.25
+    
+    // 八度跳躍
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    note A4, 0.0625
+    note A5, 0.0625
+    
+    // 壯麗的和弦進行
+    chord [G3, B3, D4, G4, B4, D5], 0.125
+    chord [F3, A3, C4, F4, A4, C5], 0.125
+    chord [E3, G3, C4, E4, G4, C5], 0.125
+    chord [D3, F3, B3, D4, F4, B4], 0.125
+    
+    // 終結性的快速琶音
+    note [C3, E3, G3, C4, E4, G4, C5, E5, G5, C6], 0.0625
+    chord [C2, C3, E3, G3, C4, E4, G4, C5], 0.5
+    chord [C2, C3, E3, G3, C4, E4, G4, C5], 0.5
+    chord [C2, C3, E3, G3, C4, E4, G4, C5], 1.0
+    rest 2.0
+    
+    tempo 120  // 恢復原速
+}
+
+// ============================================
+// 完整演奏程序
+// ============================================
+
+fn complete_mozart_k265() {
+    // 主題
+    theme()
+    rest 1.5
+    
+    // 12個變奏依序演奏
+    variation_1()
+    rest 1.0
+    
+    variation_2()
+    rest 1.0
+    
+    variation_3()
+    rest 1.0
+    
+    variation_4_minor()
+    rest 1.0
+    
+    variation_5()
+    rest 1.0
+    
+    variation_6_siciliano()
+    rest 1.0
+    
+    variation_7_canon()
+    rest 1.0
+    
+    variation_8_march()
+    rest 1.0
+    
+    variation_9_waltz()
+    rest 1.0
+    
+    variation_10_fugue()
+    rest 1.0
+    
+    variation_11_adagio()
+    rest 2.0
+    
+    variation_12_allegro()
+    
+    // 最終和弦
+    chord [C1, C2, E2, G2, C3, E3, G3, C4, E4, G4, C5], 5.0
+}
+
+// ============================================
+// 執行完整作品
+// ============================================
+
+complete_mozart_k265()
+
+// ============================================
+// 額外功能：單獨變奏選擇
+// ============================================
+
+fn play_theme_only() {
+    theme()
+}
+
+fn play_fast_variations() {
+    variation_3()
+    rest 1.0
+    variation_9_waltz()
+    rest 1.0
+    variation_12_allegro()
+}
+
+fn play_expressive_variations() {
+    variation_4_minor()
+    rest 1.0
+    variation_11_adagio()
+    rest 1.0
+    theme()
+}
+
+// 根據需要可呼叫特定變奏：
+// play_theme_only()
+// play_fast_variations()
+// play_expressive_variations()

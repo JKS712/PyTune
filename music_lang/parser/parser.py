@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 parser.py - 完整的音樂程式語言解析器
-支援多樂器、控制流、函式等完整功能
+支援多樂器、控制流、函式、休止符等完整功能
 """
 
 import os
@@ -30,6 +30,11 @@ class MusicTransformer(Transformer):
         chord = items[0]
         duration = items[1] if len(items) > 1 else None
         return {"type": "chord", "chord": chord, "duration": duration}
+    
+    def rest_stmt(self, items):
+        """處理休止符語句"""
+        expression = items[0]
+        return {"type": "rest", "duration": expression}
     
     def tempo_stmt(self, items):
         return {"type": "tempo", "bpm": items[0]}
@@ -255,7 +260,7 @@ class MusicLanguageParser:
             with open(grammar_file, 'r', encoding='utf-8') as f:
                 grammar = f.read()
         else:
-            # 內建語法定義
+            # 內建語法定義（包含休止符支援）
             grammar = '''
 // music_lang.lark - 完整的音樂程式語言語法定義
 
@@ -266,6 +271,7 @@ class MusicLanguageParser:
           | tempo_stmt
           | volume_stmt
           | instrument_stmt
+          | rest_stmt
           | loop_stmt
           | fn_stmt
           | fn_call_stmt
@@ -289,6 +295,9 @@ note_array: "[" note_list "]"
 
 // 和弦語句  
 chord_stmt: "chord" chord_literal ("," duration)?
+
+// 休止符語句
+rest_stmt: "rest" expression
 
 // 速度設定
 tempo_stmt: "tempo" number
@@ -422,7 +431,7 @@ COMMENT: "//" /[^\\n]*/
                 parser='lalr',
                 transformer=MusicTransformer()
             )
-            print("✅ 解析器初始化成功")
+            print("✅ 解析器初始化成功（支援休止符）")
         except Exception as e:
             print(f"❌ 解析器初始化失敗: {e}")
             raise
@@ -437,7 +446,7 @@ COMMENT: "//" /[^\\n]*/
             raise SyntaxError(f"語法錯誤: {e}")
 
 def test_parser():
-    """測試解析器"""
+    """測試解析器（包含休止符）"""
     parser = MusicLanguageParser()
     
     test_code = '''
@@ -445,25 +454,33 @@ def test_parser():
     volume 0.8
     
     refinst = piano
-    note [C4, D4, E4], 0.5
+    note C4, 0.5
+    rest 0.5
+    note D4, 0.5
+    rest 1.0
     
-    refinst = violin
-    note G4, 1.0
+    chord [C4, E4, G4], 1.0
+    rest 2.0
     
-    fn melody() {
-        note [C4, E4, G4], 0.5
+    fn melody_with_rests() {
+        note C4, 0.5
+        rest 0.25
+        note E4, 0.5
+        rest 0.25
+        note G4, 1.0
     }
     
-    melody()
+    melody_with_rests()
     
     for (i, 0:3) {
         note C4, 0.3
+        rest 0.2
     }
     '''
     
     try:
         ast = parser.parse(test_code)
-        print("✅ 解析成功！")
+        print("✅ 解析成功（包含休止符）！")
         print(f"AST: {ast}")
         return ast
     except Exception as e:

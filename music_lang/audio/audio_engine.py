@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-audio_engine.py - 完整的多樂器音訊引擎 (修復版)
-支援10種樂器音色、多軌道演奏、動態樂器切換
+audio_engine.py - 完整的多樂器音訊引擎 (支援休止符)
+支援10種樂器音色、多軌道演奏、動態樂器切換、休止符功能
 """
 
 import pygame
@@ -315,55 +315,6 @@ class InstrumentSynthesizer:
         wave += 0.3 * np.sin(2 * np.pi * frequency * 3 * t)   # 十二度
         wave += 0.1 * np.sin(2 * np.pi * frequency * 4 * t)   # 十五度
         wave += 0.25 * np.sin(2 * np.pi * frequency * 6 * t)  # 十九度
-        return wave * frequency * t
-        wave += 0.12 * np.sin(2 * np.pi * frequency * 2 * t)
-        wave += 0.06 * np.sin(2 * np.pi * frequency * 3 * t)
-        # 柔和的指數衰減
-        decay = np.exp(-t * 1.5)
-        return wave * decay
-    
-    def _generate_soft_percussion_wave(self, frequency, t):
-        """生成柔和打擊樂音色"""
-        # 減少噪音比例，增加調性
-        noise = np.random.normal(0, 0.15, len(t))  # 減少噪音強度
-        tone = 0.6 * np.sin(2 * np.pi * frequency * t)  # 增加調性成分
-        # 更快的衰減
-        decay = np.exp(-t * 12)
-        return (0.4 * noise + 0.6 * tone) * decay
-    
-    def _generate_soft_brass_wave(self, frequency, t):
-        """生成柔和銅管音色"""
-        # 減少尖銳的泛音
-        wave = np.sin(2 * np.pi * frequency * t)
-        wave += 0.3 * np.sin(2 * np.pi * frequency * 2 * t)
-        wave += 0.15 * np.sin(2 * np.pi * frequency * 3 * t)
-        wave += 0.08 * np.sin(2 * np.pi * frequency * 4 * t)
-        return wave
-    
-    def _generate_soft_reed_wave(self, frequency, t):
-        """生成柔和簧片音色 (薩克斯風)"""
-        # 使用更多正弦波，減少方波成分
-        sine_wave = np.sin(2 * np.pi * frequency * t)
-        square_component = 0.2 * np.sign(np.sin(2 * np.pi * frequency * t))  # 減少方波比例
-        return 0.8 * sine_wave + 0.2 * square_component
-    
-    def _generate_soft_bass_wave(self, frequency, t):
-        """生成柔和低音提琴音色"""
-        wave = np.sin(2 * np.pi * frequency * t)
-        # 強調低頻泛音
-        wave += 0.4 * np.sin(2 * np.pi * frequency * 0.5 * t)
-        wave += 0.2 * np.sin(2 * np.pi * frequency * 2 * t)
-        wave += 0.1 * np.sin(2 * np.pi * frequency * 3 * t)
-        return wave
-    
-    def _generate_soft_organ_wave(self, frequency, t):
-        """生成柔和管風琴音色"""
-        # 減少高頻泛音的強度
-        wave = np.sin(2 * np.pi * frequency * t)
-        wave += 0.2 * np.sin(2 * np.pi * frequency * 2 * t)   # 八度
-        wave += 0.3 * np.sin(2 * np.pi * frequency * 3 * t)   # 十二度
-        wave += 0.1 * np.sin(2 * np.pi * frequency * 4 * t)   # 十五度
-        wave += 0.25 * np.sin(2 * np.pi * frequency * 6 * t)  # 十九度
         return wave
     
     def _generate_piano_wave(self, frequency, t):
@@ -457,7 +408,7 @@ class InstrumentSynthesizer:
 
 
 class AudioEngine:
-    """完整的音訊引擎 - 支援多樂器和程式碼執行"""
+    """完整的音訊引擎 - 支援多樂器、休止符和程式碼執行"""
     
     def __init__(self):
         # 初始化 pygame mixer
@@ -483,8 +434,9 @@ class AudioEngine:
         # 變數存儲
         self.variables = {}
         
-        print("🎵 多樂器音訊引擎初始化完成")
+        print("🎵 多樂器音訊引擎初始化完成（支援休止符）")
         print(f"📀 支援樂器: {', '.join(self.synthesizer.instrument_configs.keys())}")
+        print("🔇 支援休止符功能")
     
     def set_tempo(self, bpm):
         """設定速度"""
@@ -529,6 +481,20 @@ class AudioEngine:
         # 等待所有音符播放完成
         for thread in threads:
             thread.join()
+    
+    def play_rest(self, duration):
+        """播放休止符 - 靜默指定時間"""
+        print(f"🔇 休止符: {duration:.1f}s")
+        
+        # 記錄休止符到軌道
+        self.tracks[self.current_instrument].append({
+            'type': 'rest',
+            'duration': duration,
+            'timestamp': time.time()
+        })
+        
+        # 靜默等待
+        time.sleep(duration)
     
     def _play_single_note(self, note_str, duration):
         """播放單個音符 - 修復版本，防止破音"""
@@ -581,6 +547,7 @@ class AudioEngine:
             
             # 記錄到對應軌道
             self.tracks[self.current_instrument].append({
+                'type': 'note',
                 'note': note_str,
                 'duration': duration,
                 'timestamp': time.time()
@@ -638,6 +605,9 @@ class AudioEngine:
         
         elif node_type == 'chord':
             self._play_chord(node)
+        
+        elif node_type == 'rest':
+            self._play_rest_node(node)
         
         elif node_type == 'loop':
             count = int(self._get_value(node.get('count', {}), 1))
@@ -808,6 +778,12 @@ class AudioEngine:
         
         self.play_chord(chord_notes, duration)
     
+    def _play_rest_node(self, node):
+        """播放休止符節點"""
+        duration_node = node.get('duration', {})
+        duration = self._get_value(duration_node, 1.0)
+        self.play_rest(duration)
+    
     def _get_note_string(self, note_node):
         """從節點獲取音符字符串"""
         if isinstance(note_node, dict):
@@ -907,11 +883,14 @@ class AudioEngine:
             return
         
         print("\n📊 演奏摘要:")
-        for instrument, notes in self.tracks.items():
-            print(f"  🎹 {instrument}: {len(notes)} 個音符")
+        for instrument, events in self.tracks.items():
+            note_count = len([e for e in events if e.get('type') == 'note'])
+            rest_count = len([e for e in events if e.get('type') == 'rest'])
+            print(f"  🎹 {instrument}: {note_count} 個音符, {rest_count} 個休止符")
         
-        total_notes = sum(len(notes) for notes in self.tracks.values())
-        print(f"  🎵 總計: {total_notes} 個音符")
+        total_notes = sum(len([e for e in events if e.get('type') == 'note']) for events in self.tracks.values())
+        total_rests = sum(len([e for e in events if e.get('type') == 'rest']) for events in self.tracks.values())
+        print(f"  🎵 總計: {total_notes} 個音符, {total_rests} 個休止符")
     
     def stop(self):
         """停止所有播放"""
@@ -925,21 +904,26 @@ class AudioEngine:
 
 # 測試範例
 if __name__ == "__main__":
-    # 測試音訊引擎
+    # 測試音訊引擎（包含休止符）
     engine = AudioEngine()
     
-    print("\n🎼 測試不同樂器...")
+    print("\n🎼 測試不同樂器和休止符...")
     
-    # 測試鋼琴
+    # 測試鋼琴和休止符
     engine.set_instrument('piano')
     engine.play_note('C4', 1.0)
+    engine.play_rest(0.5)  # 休止符
+    engine.play_note('D4', 1.0)
     
     # 測試小提琴
     engine.set_instrument('violin')
     engine.play_note('G4', 1.0)
+    engine.play_rest(1.0)  # 長休止符
     
-    # 測試和弦
+    # 測試和弦與休止符組合
     engine.set_instrument('organ')
     engine.play_chord(['C4', 'E4', 'G4'], 2.0)
+    engine.play_rest(1.5)
+    engine.play_chord(['F4', 'A4', 'C5'], 2.0)
     
-    print("🎵 測試完成！")
+    print("🎵 測試完成（包含休止符）！")
