@@ -1,231 +1,377 @@
-// ruby.ptm - 修復的 PyTune 範例檔案
-// 樂譜轉換為 PyTune 程式碼（包含休止符）
-// BPM = 132, B大調, 每次高八度換不同樂器
+// 四聲部和聲音樂 - PyTune 實現
+// 三個和聲聲部 + 一個主旋律/旁白聲部
+// 每個聲部使用不同樂器以區分音色
 
-tempo 132
+tempo 120
 volume 0.7
 
-// === 第54小節開始 - 添加適當的休止符 ===
-// 使用鋼琴演奏基本音域
-refinst = piano
+// === 定義各聲部的音樂片段 ===
 
-// 第54小節 - 八分音符流動樂句與休止符
-note [F#4, G#4, A#4, B4], 0.125
-rest 0.0625
-note [C#5, D#5], 0.25
-rest 0.125
-note B4, 0.5
-
-// 第55小節 - 樂句間的呼吸
-note [F#4, G#4], 0.25
-rest 0.0625
-note [A#4, B4, C#5], 0.125
-note D#5, 0.375
-rest 0.125
-note C#5, 0.25
-
-// 第56小節 - 和弦與旋律結合，加入節奏感
-chord [F#4, A#4, C#5], 0.5
-rest 0.25
-note [D#5, E5, F#5], 0.125
-rest 0.0625
-note G#5, 0.375
-
-// === 第57-58小節 高八度段落 ===
-// 8va 記號 - 切換到小提琴
-refinst = violin
-
-rest 0.5
-
-// 高八度演奏
-note [F#5, G#5, A#5, B5], 0.125
-rest 0.125
-note [C#6, D#6], 0.25
-rest 0.25
-note B5, 0.5
-
-// 連續十六分音符樂句
-note [G#5, A#5, B5, C#6], 0.0625
-rest 0.0625
-note [D#6, E6, F#6, G#6], 0.0625
-rest 0.125
-note [A#6, B6], 0.25
-
-// === 第59-60小節 ===
-// 繼續高音域 - 切換到長笛
-refinst = flute
-
-rest 0.75
-
-note [F#6, E6, D#6, C#6], 0.125
-rest 0.25
-note B5, 0.25
-note [A#5, G#5], 0.125
-rest 0.125
-note F#5, 0.25
-
-// 裝飾音樂句
-rest 0.25
-note [G#5, F#5, G#5, A#5], 0.0625
-rest 0.0625
-note B5, 0.25
-
-// === 第61-62小節 回到中音域 ===
-// 切換到大提琴
-refinst = cello
-
-rest 1.0
-
-note [F#4, A#4, D#5], 0.25
-rest 0.25
-chord [F#4, B4, D#5], 0.5
-rest 0.25
-note C#5, 0.25
-
-// 和弦進行
-chord [G#4, B4, E5], 0.5
-rest 0.5
-chord [F#4, A#4, C#5], 0.5
-rest 0.75
-
-// === 第63-64小節 華彩樂句 ===
-// 切換到鋼琴進行華彩
-refinst = piano
-
-rest 0.5
-
-// 快速音階上行
-note [B4, C#5, D#5, E5], 0.0625
-rest 0.03125
-note [F#5, G#5, A#5, B5], 0.0625
-rest 0.0625
-note [C#6, B5, A#5, G#5], 0.125
-
-// 下行音階
-rest 0.25
-note [F#5, E5, D#5, C#5], 0.0625
-rest 0.03125
-note [B4, A#4, G#4, F#4], 0.0625
-
-// === 第65小節開始 終結段落 ===
-// 使用管風琴營造莊嚴感
-refinst = organ
-
-rest 1.5
-
-// 和弦終結
-chord [F#4, B4, D#5, F#5], 1.0
-rest 0.5
-chord [G#4, C#5, E5, G#5], 1.0
-rest 1.0
-
-// 最終和弦
-chord [B3, F#4, B4, D#5, F#5, B5], 2.0
-rest 3.0
-
-// === 創作休止符節奏模式 ===
-
-fn rhythmic_pattern_with_rests() {
-    // 創造有節奏感的音符與休止符組合
-    note C4, 0.25
-    rest 0.25
-    note E4, 0.125
-    rest 0.125
-    note G4, 0.5
-    rest 0.5
-}
-
-fn syncopated_rhythm() {
-    // 切分節奏模式
-    rest 0.125
-    note F#4, 0.25
-    rest 0.0625
-    note A#4, 0.125
-    rest 0.25
-    note D#5, 0.375
-    rest 0.125
-}
-
-// === 不同樂器的休止符展示 ===
-
-fn instrument_showcase_with_rests() {
-    // 每種樂器都有其特色的休止符運用
-    
-    // 鋼琴 - 清晰的休止符
-    refinst = piano
-    note C4, 0.5
-    rest 0.25
-    note E4, 0.5
-    rest 0.5
-    
-    // 小提琴 - 弓法換向的休止
-    refinst = violin
-    note G4, 0.75
-    rest 0.125
-    note B4, 0.75
-    rest 0.25
-    
-    // 管樂器 - 呼吸間隙
+// 高音聲部 (Soprano) - 使用長笛
+fn soprano_part() {
     refinst = flute
-    note D5, 1.0
-    rest 0.5
-    note F#5, 1.0
-    rest 0.75
     
-    // 打擊樂 - 節奏重音
-    refinst = drums
-    note C3, 0.25
-    rest 0.25
-    note C3, 0.25
-    rest 0.75
-}
-
-// === 複合節奏模式 ===
-
-fn complex_rhythm_with_rests() {
-    // 複雜的節奏模式包含各種休止符
-    
-    refinst = trumpet
-    
-    // 主題呈示
-    note B4, 0.375
-    rest 0.125
-    note D5, 0.25
-    rest 0.0625
-    note F#5, 0.1875
-    
-    // 呼應樂句
-    rest 0.5
-    note A5, 0.25
-    rest 0.25
-    note F#5, 0.25
-    rest 0.125
-    note D5, 0.375
-    
-    // 終結
+    // 主旋律線條 - 請根據實際音樂填入音符
+    note C5, 1.0
+    note D5, 1.0  
+    note E5, 2.0
     rest 1.0
+    
+    note F5, 1.0
+    note E5, 1.0
+    note D5, 2.0
+    rest 1.0
+    
+    note G5, 1.0
+    note F5, 1.0
+    note E5, 1.0
+    note D5, 1.0
+    note C5, 2.0
+    rest 2.0
+}
+
+// 中音聲部 (Alto) - 使用小提琴
+fn alto_part() {
+    refinst = violin
+    
+    // 中音和聲線條
+    note G4, 1.0
+    note A4, 1.0
     note B4, 2.0
+    rest 1.0
+    
+    note C5, 1.0
+    note B4, 1.0
+    note A4, 2.0
+    rest 1.0
+    
+    note D5, 1.0
+    note C5, 1.0
+    note B4, 1.0
+    note A4, 1.0
+    note G4, 2.0
+    rest 2.0
 }
 
-// === 執行示範 ===
+// 次中音聲部 (Tenor) - 使用大提琴
+fn tenor_part() {
+    refinst = cello
+    
+    // 次中音和聲線條
+    note E4, 1.0
+    note F4, 1.0
+    note G4, 2.0
+    rest 1.0
+    
+    note A4, 1.0
+    note G4, 1.0
+    note F4, 2.0
+    rest 1.0
+    
+    note B4, 1.0
+    note A4, 1.0
+    note G4, 1.0
+    note F4, 1.0
+    note E4, 2.0
+    rest 2.0
+}
 
-// 執行基本節奏模式
-rhythmic_pattern_with_rests()
-syncopated_rhythm()
+// 低音聲部 (Bass) - 使用低音提琴
+fn bass_part() {
+    refinst = bass
+    
+    // 低音基礎線條
+    note C3, 2.0
+    note G3, 2.0
+    rest 1.0
+    
+    note F3, 2.0
+    note C3, 2.0
+    rest 1.0
+    
+    note G3, 1.0
+    note F3, 1.0
+    note E3, 1.0
+    note D3, 1.0
+    note C3, 2.0
+    rest 2.0
+}
 
-// 執行樂器展示
-instrument_showcase_with_rests()
-
-// 執行複合節奏
-complex_rhythm_with_rests()
-
-// === 迴圈中的休止符 ===
-
-for (i, 0:4) {
+// 旁白/獨奏聲部 - 使用鋼琴或人聲效果
+fn narration_part() {
     refinst = piano
-    note C4, 0.25
-    rest 0.25
+    
+    // 可以是旋律裝飾或者節奏性的旁白
+    rest 4.0  // 前四拍靜默
+    
+    // 裝飾性旋律
+    note E5, 0.5
+    note F5, 0.5
+    note G5, 0.5
+    note A5, 0.5
+    
+    rest 2.0
+    
+    // 呼應主題
+    note C6, 1.0
+    note B5, 0.5
+    note A5, 0.5
+    note G5, 2.0
+    
+    rest 4.0
 }
 
-// 結尾的長休止符
-rest 2.0
+// === 和聲進行定義 ===
+
+// C大調基本和弦進行
+fn chord_progression() {
+    refinst = organ
+    
+    // I - vi - IV - V - I
+    chord [C4, E4, G4], 2.0      // C major
+    rest 0.5
+    chord [A3, C4, E4], 2.0      // A minor  
+    rest 0.5
+    chord [F3, A3, C4], 2.0      // F major
+    rest 0.5
+    chord [G3, B3, D4], 2.0      // G major
+    rest 0.5
+    chord [C4, E4, G4], 4.0      // C major (final)
+}
+
+// === 多線程演奏實現 ===
+
+// 使用函數來模擬同時演奏的效果
+fn simultaneous_harmony() {
+    // 注意：由於PyTune的限制，真正的多線程需要特殊處理
+    // 這裡用函數調用來演示各聲部的組織
+    
+    // 第一段 - 引入
+    bass_part()
+    
+    // 第二段 - 加入和聲
+    alto_part()
+    tenor_part()
+    
+    // 第三段 - 完整和聲
+    soprano_part()
+    
+    // 第四段 - 加入旁白
+    narration_part()
+}
+
+// === 分段演奏版本 ===
+
+fn section_a() {
+    // A段 - 建立基礎
+    tempo 120
+    
+    // 低音進入
+    refinst = bass
+    note C3, 1.0
+    note G3, 1.0
+    note E3, 1.0
+    note C3, 1.0
+    
+    rest 1.0
+    
+    // 大提琴加入
+    refinst = cello  
+    note E4, 1.0
+    note D4, 1.0
+    note C4, 2.0
+    
+    rest 1.0
+}
+
+fn section_b() {
+    // B段 - 和聲豐滿
+    
+    // 小提琴旋律
+    refinst = violin
+    note G4, 0.5
+    note A4, 0.5
+    note B4, 1.0
+    note C5, 2.0
+    
+    rest 0.5
+    
+    // 長笛裝飾
+    refinst = flute
+    note E5, 0.25
+    note F5, 0.25
+    note G5, 0.5
+    note F5, 0.5
+    note E5, 1.0
+    
+    rest 1.0
+}
+
+fn section_c() {
+    // C段 - 旁白/獨奏
+    
+    refinst = piano
+    
+    // 模擬說話節奏的音符
+    note C5, 0.3
+    rest 0.2
+    note D5, 0.3
+    rest 0.2
+    note E5, 0.5
+    rest 0.5
+    
+    note F5, 0.4
+    rest 0.1
+    note E5, 0.4
+    rest 0.1
+    note D5, 0.8
+    rest 1.2
+    
+    // 旋律性回應
+    note G5, 1.0
+    note F5, 1.0
+    note E5, 2.0
+}
+
+fn section_d() {
+    // D段 - 全體合奏高潮
+    
+    // 和弦支撐
+    refinst = organ
+    chord [C4, E4, G4, C5], 2.0
+    rest 0.5
+    chord [F4, A4, C5, F5], 2.0
+    rest 0.5
+    chord [G4, B4, D5, G5], 4.0
+}
+
+// === 完整樂曲結構 ===
+
+fn complete_arrangement() {
+    // 完整的四聲部編排
+    
+    volume 0.6  // 整體音量控制
+    
+    // 引子 - 單聲部進入
+    section_a()
+    rest 1.0
+    
+    // 發展 - 和聲層層加入  
+    section_b()
+    rest 1.0
+    
+    // 對比 - 旁白段落
+    section_c()
+    rest 1.0
+    
+    // 高潮 - 全體合奏
+    section_d()
+    rest 2.0
+    
+    // 尾聲 - 回到安靜
+    refinst = piano
+    chord [C4, E4, G4], 2.0
+    rest 1.0
+    note C5, 4.0
+    rest 3.0
+}
+
+// === 節奏性伴奏模式 ===
+
+fn rhythmic_accompaniment() {
+    refinst = drums
+    
+    // 基本節拍
+    for (i, 0:8) {
+        note C3, 0.25  // 強拍
+        rest 0.25
+        note C3, 0.125 // 弱拍
+        rest 0.125
+        note C3, 0.25  // 後拍
+        rest 0.25
+    }
+}
+
+// === 主題與變奏 ===
+
+fn main_theme() {
+    refinst = flute
+    
+    // 主題陳述
+    note C5, 1.0
+    note D5, 0.5
+    note E5, 0.5
+    note F5, 2.0
+    rest 1.0
+    
+    note G5, 1.0
+    note F5, 0.5
+    note E5, 0.5  
+    note D5, 1.0
+    note C5, 1.0
+    rest 2.0
+}
+
+fn theme_variation_1() {
+    refinst = violin
+    
+    // 變奏1 - 裝飾音型
+    note C5, 0.5
+    note D5, 0.25
+    note C5, 0.25
+    note E5, 0.5
+    note F5, 0.25
+    note E5, 0.25
+    note F5, 1.0
+    rest 1.0
+    
+    note G5, 0.25
+    note A5, 0.25
+    note G5, 0.5
+    note F5, 0.5
+    note E5, 0.5
+    note D5, 0.5
+    note C5, 1.0
+    rest 2.0
+}
+
+fn theme_variation_2() {
+    refinst = cello
+    
+    // 變奏2 - 低音版本
+    note C4, 1.0
+    note D4, 0.5
+    note E4, 0.5
+    note F4, 2.0
+    rest 1.0
+    
+    note G4, 1.0
+    note F4, 0.5
+    note E4, 0.5
+    note D4, 1.0
+    note C4, 1.0
+    rest 2.0
+}
+
+// === 執行完整作品 ===
+
+// 執行主要段落
+complete_arrangement()
+
+// 或者執行主題與變奏
+// main_theme()
+// theme_variation_1() 
+// theme_variation_2()
+
+// 或者執行和聲進行
+// chord_progression()
+
+// === 使用說明 ===
+// 1. 請根據實際音樂內容替換音符
+// 2. 調整速度和音量以符合原曲風格
+// 3. 可以修改樂器配置來達到最佳音色效果
+// 4. 使用rest語句來創造適當的呼吸空間
+// 5. 可以用迴圈和函數來處理重複的音樂段落
+
+// 範例：如果您能提供具體的音符或錄音分析，
+// 我可以幫您填入準確的音高和節奏

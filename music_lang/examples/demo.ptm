@@ -1,0 +1,79 @@
+tempo 120
+volume 0.8
+
+// ===不同樂器演示===
+
+fn instrument_demo() {
+    note [C4, E4, G4, C5], 0.5
+    rest 0.5
+}
+
+refinst = piano
+instrument_demo()    // 鋼琴
+
+refinst = violin  
+instrument_demo()    // 小提琴
+
+refinst = flute
+instrument_demo()    // 長笛
+
+refinst = trumpet
+instrument_demo()    // 小號
+
+refinst = cello
+note [C3, E3, G3, C4], 0.5  // 大提琴
+rest 1.0
+
+// === 小星星函數 ===
+
+fn twinkle_theme() {
+    note [C4, C4, G4, G4, A4, A4], 0.8
+    note G4, 1.6
+    rest 0.5
+}
+
+fn little_star_theme() {
+    note [F4, F4, E4, E4, D4, D4], 0.8
+    note C4, 1.6
+    rest 0.5
+}
+
+fn sky_theme() {
+    note [G4, G4, F4, F4, E4, E4], 0.8
+    note D4, 1.6
+    rest 0.5
+}
+
+// === 鋼琴演奏小星星 ===
+
+refinst = piano
+tempo 100
+
+twinkle_theme()      
+little_star_theme()  
+sky_theme()          
+sky_theme()          
+twinkle_theme()      
+little_star_theme()  
+
+// === 雙樂器合音結尾函數 ===
+
+fn piano_ending() {
+    // 鋼琴主和聲進行
+    chord [C4, E4, G4], 2.0     
+    chord [F4, A4, C5], 2.0     
+    chord [G4, B4, D5], 2.0    
+    chord [C4, E4, G4, C5], 4.0 
+}
+
+refinst = piano
+volume 0.9
+piano_ending()
+
+refinst = piano
+chord [C3, E4, G4, C5], 3.0  // 鋼琴寬廣和聲
+
+refinst = violin
+note [E5, G5, C6], 3.0       // 小提琴高音點綴
+
+rest 3.0
