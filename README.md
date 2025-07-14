@@ -725,9 +725,9 @@ for (section, 0:10) {
 ## 📝 開發模式
 
 ### 建立新的音樂程式
-1. 建立 `.ml` 檔案
+1. 建立 `.ptm` 檔案
 2. 編寫音樂程式碼
-3. 執行測試：`python main.py your_song.ml`
+3. 執行測試：`python main.py your_song.ptm`
 
 ### 除錯流程
 1. 檢查語法：使用 `--verbose` 模式
