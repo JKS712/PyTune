@@ -67,12 +67,9 @@ python main.py examples\twinkle_star.ptm
 🎵 音樂播放完成！
 ```
 
-## ⚙️ main.py 程式架構
+## 🎵 PyTune 語法說明
 
-### 主執行檔結構
 ```
-🎵 PyTune 語法說明
-
 基本語法：
   note C4, 1.0              # 播放音符
   note [C4, D4, E4], 0.5    # 播放音符陣列
